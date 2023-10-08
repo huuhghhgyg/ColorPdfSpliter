@@ -1,3 +1,5 @@
+#!/usr/bin/python
+
 # 导入需要的模块
 import os
 
@@ -10,7 +12,7 @@ RGBDiff = 10  # RGB颜色总差异之和
 ExportDir = './export'
 
 # 定义一个函数，判断一个页面是否为彩色页面
-def is_color_page(page):
+def isColorPage(page):
     # 获取页面的像素矩阵
     pix = page.get_pixmap()
     # 将像素矩阵转换为numpy数组
@@ -29,7 +31,7 @@ def is_color_page(page):
     return False
 
 
-def SplitPDF(file, exportdir=''):
+def splitPDF(file, exportdir=''):
     # 文件名设置
     filename = {
         'input': file,
@@ -49,7 +51,7 @@ def SplitPDF(file, exportdir=''):
         count['page'] = count['page'] + 1
         print("检测页面：", count['page'],'/',len(doc))
         # 判断页面是否为彩色页面
-        if is_color_page(page):
+        if isColorPage(page):
             # 如果是，将页面添加到彩色pdf文件中
             color_doc.insert_pdf(doc, from_page=page.number, to_page=page.number)
             count['color'] = count['color'] + 1
@@ -88,11 +90,11 @@ if len(pdf_list) > 1:
 
     for i in range(len(pdf_list)):
         print('[', i + 1, '/', len(pdf_list), '] 正在处理:', pdf_list[i])
-        SplitPDF(pdf_list[i],'./export/')
+        splitPDF(pdf_list[i],'./export/')
         print('\n')
 
     print('多项文件已保存至',ExportDir)
 elif len(pdf_list) == 1:
-    SplitPDF(pdf_list[0])
+    splitPDF(pdf_list[0])
 
 print("已完成")

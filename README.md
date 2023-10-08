@@ -24,6 +24,10 @@ Linux用户应该比较少吧，直接用命令行也很方便😋
    ```sh
    python ColorPdfSpliter.py
    ```
+   或者可以直接执行(因为添加了Shebang)
+   ```sh
+   ./ColorPdfSpliter.py 2>/dev/null
+   ```
    即可开始分割文件
 
 ## 高级用法
