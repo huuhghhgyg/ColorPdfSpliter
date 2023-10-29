@@ -1,4 +1,7 @@
 # ColorPdfSpliter
+
+[English](README_EN.md) | 中文
+
 将输入的PDF文件分为彩色和黑白两部分，彩色打印页数多时省钱💴
 
 (我校打印店黑白打印0.2元/张，彩色打印1元/张。彩色打印课程作业或者什么其他的文件的时候能省很多钱。这个程序有巨大的实用价值🤑)
@@ -15,19 +18,26 @@
 ### Linux
 Linux用户应该比较少吧，直接用命令行也很方便😋
 
-1. 安装依赖包
+1. 克隆这个仓库
+    ```sh
+    git clone https://github.com/huuhghhgyg/ColorPdfSpliter.git
+    ```
+
+2. 安装依赖包
     ```sh
     pip install PyMuPDF numpy
     ```
 
-2. **运行：** 和Windows的操作方法一样，将所有需要处理的PDF文件丢进当前目录中，执行
+3. **运行：** 和Windows的操作方法一样，将所有需要处理的PDF文件丢进当前目录中，执行
    ```sh
    python ColorPdfSpliter.py
    ```
-   或者可以直接执行(因为添加了Shebang)
+
+   或者你也可以利用文件中的shebang直接运行这个程序:
    ```sh
    ./ColorPdfSpliter.py 2>/dev/null
    ```
+   
    即可开始分割文件
 
 ## 高级用法
