@@ -10,10 +10,15 @@ A program that splits input PDF files into color and black & white parts, saving
 
 ## Usage
 ### Windows
-1. Make sure you have Python3 installed on your computer. Run `initialize.bat` to install the required dependencies. If you don't have Python3 installed on your computer, please download and install it from the [Python official website](https://www.python.org/downloads/).
-2. **Run**: After the installation is complete, place the PDF files to be split in the current directory. Run `run.bat` to split all PDF files in the current directory.
-   - If there is only one file, the split files will be placed directly in the current directory.
-   - If you put in multiple files, the split files will be placed in the `./export` folder. This is the default path. You can modify the export path by modifying the `ExportDir` parameter in the source file.
+1. Download the [repository](https://github.com/huuhghhgyg/ColorPdfSpliter/archive/refs/heads/main.zip) by either clicking on the link or using the "clone" button in the upper right corner of this repository.
+    
+2. Ensure that Python3 is installed on your computer. Run `initialize.bat` to install the necessary dependencies. If Python3 is not installed on your computer, you can download and install it from the [Python official website](https://www.python.org/downloads/).
+    
+3. **Run:** After the installation is complete, place the PDF file(s) you want to split into the current directory. Run `run.bat`, and it will split all the PDF files in the current directory.
+    
+    * If there is only one file, the split files will be placed directly in the current directory.
+    * If you have multiple files, the split files will be placed in the `./export` folder. This is the default path, and you can modify the export path by changing the `ExportDir` parameter in the source file.
+
 ### Linux
 Linux users should be relatively rare, so using the command line is also very convenient (no double click needed 😋)
 

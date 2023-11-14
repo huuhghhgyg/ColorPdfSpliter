@@ -10,8 +10,9 @@
 
 ## 使用方法
 ### Windows
-1. 保证你的电脑上安装了Python3，运行`initialize.bat`安装所需依赖包。如果你的电脑上没有安装Python3，请到[Python官网](https://www.python.org/downloads/)下载安装。
-2. **运行：** 安装完成后，将需要分割的PDF文件放入当前目录中，运行`run.bat`后就会对当前目录下的所有PDF文件进行分割。
+1. 下载本[repo](https://github.com/huuhghhgyg/ColorPdfSpliter/archive/refs/heads/main.zip)，或按照右上角绿色按钮的提示`clone`本仓库。
+2. 保证你的电脑上安装了Python3，运行`initialize.bat`安装所需依赖包。如果你的电脑上没有安装Python3，请到[Python官网](https://www.python.org/downloads/)下载安装。
+3. **运行：** 安装完成后，将需要分割的PDF文件放入当前目录中，运行`run.bat`后就会对当前目录下的所有PDF文件进行分割。
    * 如果只有一个文件，分割得到的文件会直接放在当前目录下。
    * 如果放入了多个文件，分割得到的文件会放在`./export`文件夹中。这是一个默认路径，你可以通过在源文件中修改`ExportDir`参数来修改导出路径。
 
