@@ -1,0 +1,1 @@
+Get-FileHash *.pdf -Algorithm MD5| Format-List

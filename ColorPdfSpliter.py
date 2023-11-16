@@ -9,7 +9,7 @@ import glob  # 用于获取当前目录文件
 
 # 参数设置
 RGBDiff = 10  # RGB颜色总差异之和
-ExportDir = './export'
+ExportDir = "./export"
 
 # 定义一个函数，判断一个页面是否为彩色页面
 def isColorPage(page):
@@ -30,71 +30,71 @@ def isColorPage(page):
     # 否则，页面为非彩色页面
     return False
 
-
-def splitPDF(file, exportdir=''):
+def splitPDF(filePath, exportdir=""):
     # 文件名设置
     filename = {
-        'input': file,
-        'graypages': file[:-4] + '_黑白.pdf',
-        'colorpages': file[:-4] + '_彩色.pdf'
+        "input": filePath,
+        "graypages": filePath[:-4] + "_黑白.pdf",
+        "colorpages": filePath[:-4] + "_彩色.pdf",
     }
 
     # 打开一个pdf文件
-    doc = fitz.open(file)
+    doc = fitz.open(filePath)
     # 创建两个空的pdf文件，用于保存彩色页面和非彩色页面
     color_doc = fitz.open()
     gray_doc = fitz.open()
 
-    count = {'page': 0, 'gray': 0, 'color': 0}
+    count = {"page": 0, "gray": 0, "color": 0}
     # 遍历原pdf文件中的每个页面
     for page in doc:
-        count['page'] = count['page'] + 1
-        print("检测页面：", count['page'],'/',len(doc))
+        count["page"] = count["page"] + 1
+        print("检测页面：", count["page"], "/", len(doc))
         # 判断页面是否为彩色页面
         if isColorPage(page):
             # 如果是，将页面添加到彩色pdf文件中
             color_doc.insert_pdf(doc, from_page=page.number, to_page=page.number)
-            count['color'] = count['color'] + 1
+            count["color"] = count["color"] + 1
         else:
             # 如果不是，将页面添加到非彩色pdf文件中
             gray_doc.insert_pdf(doc, from_page=page.number, to_page=page.number)
-            count['gray'] = count['gray'] + 1
+            count["gray"] = count["gray"] + 1
 
     # 保存两个pdf文件
     # 保存灰色页面
-    if count['gray']>0:
-        print("正在保存灰色页面(共", count['gray'], "页):", filename['graypages'])
-        gray_doc.save(exportdir + filename['graypages'])
+    if count["gray"] > 0:
+        print("正在保存灰色页面(共", count["gray"], "页):", filename["graypages"])
+        gray_doc.save(exportdir + filename["graypages"])
     else:
-        print('文件',filename['input'],'分割后不存在灰色页面，不保存文件')
+        print("文件", filename["input"], "分割后不存在灰色页面，不保存文件")
 
     # 保存彩色页面
-    if count['color']>0:
-        print("正在保存彩色页面(共", count['color'], "页):", filename['colorpages'])
-        color_doc.save(exportdir + filename['colorpages'])
+    if count["color"] > 0:
+        print("正在保存彩色页面(共", count["color"], "页):", filename["colorpages"])
+        color_doc.save(exportdir + filename["colorpages"])
     else:
-        print('文件', filename['input'], '分割后不存在彩色页面，不保存文件')
-
+        print("文件", filename["input"], "分割后不存在彩色页面，不保存文件")
 
 # 总流程
-pdf_list = glob.glob('*.pdf')
-if len(pdf_list) == 0:  # 没有pdf文件
-    print('未检测到当前目录中存在pdf文件')
-    os.system('pause')
-    exit()
+# web版总流程交给js处理
 
-if len(pdf_list) > 1:
-    # 判断批量输出目录是否存在
-    if not os.path.exists(ExportDir):
-        os.mkdir(ExportDir)
+# debug
 
-    for i in range(len(pdf_list)):
-        print('[', i + 1, '/', len(pdf_list), '] 正在处理:', pdf_list[i])
-        splitPDF(pdf_list[i],'./export/')
-        print('\n')
+# import hashlib
+# def getMD5(filename):
+#     with open(filename, "rb") as f:
+#         bytes = f.read()  # read file as bytes
+#         readable_hash = hashlib.md5(bytes).hexdigest()
+#         return readable_hash
 
-    print('多项文件已保存至',ExportDir)
-elif len(pdf_list) == 1:
-    splitPDF(pdf_list[0])
-
-print("已完成")
+# 显示指定目录下的所有文件名 (debug)
+# def showAllFiles(path):
+#     # 遍历该目录下的所有文件名
+#     for filename in os.listdir(path):
+#         # 获取文件的完整路径
+#         filepath = os.path.join(path, filename)
+#         # 如果是文件，直接打印文件名
+#         if os.path.isfile(filepath):
+#             print(filepath)
+#         # 如果是目录，则递归调用函数
+#         elif os.path.isdir(filepath):
+#             showAllFiles(filepath)

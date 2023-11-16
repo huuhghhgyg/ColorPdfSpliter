@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.23.4/full/pyodide.js"></script>
+    <!-- <script src="https://cdn.staticfile.org/pyodide/0.23.4/pyodide.js"></script> -->
+    <!-- 编码 -->
+    <meta charset="utf-8">
+</head>
+
+<body>
+    <h1>ColorPdfSpliter Web with Pyodide</h1>
+
+    <div class="uploads" style="visibility: hidden; display: flex; flex-direction: column;">
+        <label>打开PDF文件</label>
+        <input type="file" id="file-input" accept=".pdf" onchange="uploadFile()">
+    </div>
+
+    <div id="output">
+        正在准备 Pyodide 和相关依赖
+    </div>
+
+    <div id="download"></div>
+
+    <script type="text/javascript">
+        let pyodide;
+
+        function printMessage(message) {
+            document.getElementById('output').innerHTML += '<br>' + message;
+        }
+
+        async function main() {
+            pyodide = await loadPyodide();
+            await pyodide.loadPackage("micropip");
+            const micropip = pyodide.pyimport("micropip");
+            printMessage('micropip 加载完成')
+            await micropip.install('https://ghostscript.com/~julian/pyodide/PyMuPDF-1.22.2-cp311-cp311-emscripten_3_1_32_wasm32.whl') // using remote cdn
+            // await micropip.install('./PyMuPDF-1.22.2-cp311-cp311-emscripten_3_1_32_wasm32.whl') // using local file
+            printMessage('PyMuPDF 加载完成')
+            await micropip.install('numpy')
+            printMessage('numpy 加载完成')
+            pyodide.runPython(`
+                import sys
+                print(sys.version)
+
+                import fitz
+                print(fitz.version)
+            `)
+            printMessage('库引用完成');
+
+            //读取当前目录下的script.py文件
+            pyodide.runPython(await (await fetch("./ColorPdfSpliter.py")).text());
+            printMessage('脚本加载完成');
+
+            // 显示上传按钮
+            document.getElementsByClassName('uploads')[0].style.visibility = 'visible';
+
+            return pyodide
+        }
+        main();
+
+        async function uploadFile() {
+            // 获取文件输入
+            const fileInput = document.getElementById('file-input');
+            const file = fileInput.files[0];
+
+            // Referred to https://github.com/pyodide/pyodide/issues/679
+            var reader = new FileReader();
+            reader.readAsBinaryString(file);
+            reader.onload = async function (evt) {
+                printMessage('正在读取文件')
+                content = evt.target.result;
+                var output = pyodide.runPython('from js import content\ncontent');
+                var l = output.length;
+                var array = new Uint8Array(l);
+                for (var i = 0; i < l; i++) {
+                    array[i] = output.charCodeAt(i);
+                }
+
+                pyodide.FS.writeFile(file.name, array);
+                printMessage('正在处理文件,请稍等...具体进度可以查看F12的控制台(console)')
+                await pyodide.runPythonAsync(`
+                splitPDF('${file.name}')
+                # showAllFiles('/')
+                `, {
+                    stdout: text => {
+                        printMessage(text);
+                    },
+                    stderr: text => {
+                        printMessage(text);
+                    }
+                });
+
+                printMessage('文件处理完成')
+
+                // 去除'.pdf'后缀
+                let filenameContent = file.name.slice(0, -4)
+                await generateLink(`/home/pyodide/${filenameContent}_黑白.pdf`, `${filenameContent}_黑白.pdf`)
+                await generateLink(`/home/pyodide/${filenameContent}_彩色.pdf`, `${filenameContent}_彩色.pdf`)
+            }
+        }
+
+        async function generateLink(link, filename) {
+            // await pyodide.runPython(`print(getMD5("${link}"))`)
+            let array = await pyodide.runPython(`                  
+                with open('${link}', 'rb') as fh:
+                    arr = fh.read()
+                import base64
+                base64.b64encode(arr).decode('utf-8')
+            `);
+
+            // Decode Base64 content to binary
+            const binaryContent = atob(array);
+
+            // Create a Uint8Array from the binary content
+            const arrayBuffer = new Uint8Array(binaryContent.length);
+            for (let i = 0; i < binaryContent.length; i++) {
+                arrayBuffer[i] = binaryContent.charCodeAt(i);
+            }
+
+            var blob = new Blob([arrayBuffer], { type: 'application/pdf' });
+            var elem = window.document.createElement('a');
+            elem.target = '_blank';
+            elem.href = window.URL.createObjectURL(blob);
+            elem.download = filename;
+            elem.innerText = filename;
+
+            // 输出
+            document.getElementById('download').innerHTML += '<br><span>下载</span>';
+            document.getElementById('download').appendChild(elem);
+        }
+    </script>
+
+</html>
