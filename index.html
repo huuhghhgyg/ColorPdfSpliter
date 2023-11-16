@@ -3,7 +3,6 @@
 
 <head>
     <script src="https://cdn.jsdelivr.net/pyodide/v0.23.4/full/pyodide.js"></script>
-    <!-- <script src="https://cdn.staticfile.org/pyodide/0.23.4/pyodide.js"></script> -->
     <!-- 编码 -->
     <meta charset="utf-8">
 </head>
@@ -11,10 +10,14 @@
 <body>
     <h1>ColorPdfSpliter Web with Pyodide</h1>
 
-    <div class="uploads" style="visibility: hidden; display: flex; flex-direction: column;">
+    <p>提示：Web版内存占用较高，长期大批量处理建议使用Python版本</p>
+
+    <div class="uploads" style="display: flex; flex-direction: column;">
         <label>打开PDF文件</label>
-        <input type="file" id="file-input" accept=".pdf" onchange="uploadFile()">
+        <input type="file" id="file-input" accept=".pdf" onchange="uploadFile()" disabled="disabled">
     </div>
+
+    <br>
 
     <div id="output">
         正在准备 Pyodide 和相关依赖
@@ -53,7 +56,8 @@
             printMessage('脚本加载完成');
 
             // 显示上传按钮
-            document.getElementsByClassName('uploads')[0].style.visibility = 'visible';
+            document.getElementById('file-input').disabled = false;
+            printMessage('✅准备就绪');
 
             return pyodide
         }
@@ -91,7 +95,7 @@
                     }
                 });
 
-                printMessage('文件处理完成')
+                printMessage('✅文件处理完成')
 
                 // 去除'.pdf'后缀
                 let filenameContent = file.name.slice(0, -4)
