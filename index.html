@@ -49,7 +49,7 @@
             printMessage('库引用完成');
 
             //读取当前目录下的script.py文件
-            pyodide.runPython(await (await fetch("./ColorPdfSpliter.py")).text());
+            pyodide.runPython(await (await fetch("./ColorPdfSpliterWeb.py")).text());
             printMessage('脚本加载完成');
 
             // 显示上传按钮
