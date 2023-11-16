@@ -35,8 +35,8 @@ def splitPDF(file, exportdir=''):
     # 文件名设置
     filename = {
         'input': file,
-        'graypages': file.strip('.pdf') + '_黑白.pdf',
-        'colorpages': file.strip('.pdf') + '_彩色.pdf'
+        'graypages': file[:-4] + '_黑白.pdf',
+        'colorpages': file[:-4] + '_彩色.pdf'
     }
 
     # 打开一个pdf文件
