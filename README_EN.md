@@ -6,6 +6,8 @@ A program that splits input PDF files into color and black & white parts, saving
 
 (Our school's printing shop charges 0.2 yuan/page for black and white printing and 1 yuan/page for color printing. This program can save a lot of money when printing course assignments or other files in color. It has great practical value🤑)
 
+For temporary use, you can try the online version [ColorPdfSpliter Web](https://huuhghhgyg.github.io/ColorPdfSpliter/). But the online version will occupy a lot of memory when processing files multiple times, so it is recommended to use the local batch version.
+
 > If you think this is a good thing, give it a star ⭐?
 
 ## Usage
