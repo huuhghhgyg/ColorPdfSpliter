@@ -20,7 +20,7 @@
     <br>
 
     <div id="output">
-        正在准备 Pyodide 和相关依赖
+        ⏳正在准备 Pyodide 和相关依赖...
     </div>
 
     <div id="download"></div>
@@ -28,12 +28,27 @@
     <script type="text/javascript">
         let pyodide;
 
+        // 输出信息
         function printMessage(message) {
             document.getElementById('output').innerHTML += '<br>' + message;
         }
 
+        // 输出错误，后期可改造处理
+        function printError(err_message) {
+            printMessage(err_message)
+        }
+
         async function main() {
-            pyodide = await loadPyodide();
+            pyodide = await loadPyodide({
+                // indexURL: "https://cdn.jsdelivr.net/pyodide/v0.23.4/full/",
+                // fullStdLib: false,
+                // stdout: text => {
+                //     printMessage(text);
+                // },
+                stderr: text => {
+                    printMessage(text);
+                }
+            });
             await pyodide.loadPackage("micropip");
             const micropip = pyodide.pyimport("micropip");
             printMessage('micropip 加载完成')
@@ -83,17 +98,22 @@
 
                 pyodide.FS.writeFile(file.name, array);
                 printMessage('正在处理文件,请稍等...具体进度可以查看F12的控制台(console)')
-                await pyodide.runPythonAsync(`
-                splitPDF('${file.name}')
-                # showAllFiles('/')
-                `, {
-                    stdout: text => {
-                        printMessage(text);
-                    },
-                    stderr: text => {
-                        printMessage(text);
-                    }
-                });
+                var state = undefined
+                try {
+                    await pyodide.runPythonAsync(`
+                        splitPDF('${file.name}')
+                        # showAllFiles('/')
+                    `);
+                } catch (e) {
+                    state = e.message
+                    printError(e.message)
+                }
+
+                // 如果state不为undefined，说明处理失败
+                if (state !== undefined){
+                    printMessage('❌文件处理失败')
+                    return;
+                }
 
                 printMessage('✅文件处理完成')
 
@@ -106,12 +126,26 @@
 
         async function generateLink(link, filename) {
             // await pyodide.runPython(`print(getMD5("${link}"))`)
-            let array = await pyodide.runPython(`                  
-                with open('${link}', 'rb') as fh:
-                    arr = fh.read()
-                import base64
-                base64.b64encode(arr).decode('utf-8')
-            `);
+
+            // 检查文件是否存在
+            let fileExist = await pyodide.runPython(`os.path.exists("${link}")`)
+            if (!fileExist) {
+                printMessage(`没有 ${filename}`)
+                return
+            }
+
+            var array
+            try{
+                array = await pyodide.runPython(`
+                    with open('${link}', 'rb') as fh:
+                        arr = fh.read()
+                    import base64
+                    base64.b64encode(arr).decode('utf-8')
+                `);
+            }catch(e){
+                printError(e.message)
+                return
+            }
 
             // Decode Base64 content to binary
             const binaryContent = atob(array);
