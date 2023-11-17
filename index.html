@@ -52,8 +52,8 @@
             await pyodide.loadPackage("micropip");
             const micropip = pyodide.pyimport("micropip");
             printMessage('micropip 加载完成')
-            await micropip.install('https://ghostscript.com/~julian/pyodide/PyMuPDF-1.22.2-cp311-cp311-emscripten_3_1_32_wasm32.whl') // using remote cdn
-            // await micropip.install('./PyMuPDF-1.22.2-cp311-cp311-emscripten_3_1_32_wasm32.whl') // using local file
+            await pyodide.loadPackage('https://ghostscript.com/~julian/pyodide/PyMuPDF-1.23.5-cp311-none-emscripten_3_1_32_wasm32.whl');
+            // await pyodide.loadPackage('PyMuPDF-1.23.5-cp311-none-emscripten_3_1_32_wasm32.whl');
             printMessage('PyMuPDF 加载完成')
             await micropip.install('numpy')
             printMessage('numpy 加载完成')
