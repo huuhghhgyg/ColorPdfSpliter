@@ -4,7 +4,6 @@
 import os
 
 import fitz  # 用于处理pdf文件
-import numpy as np  # 用于处理数组
 import glob  # 用于获取当前目录文件
 
 # 参数设置
@@ -15,16 +14,20 @@ ExportDir = "./export"
 def isColorPage(page):
     # 获取页面的像素矩阵
     pix = page.get_pixmap()
-    # 将像素矩阵转换为numpy数组
-    arr = np.frombuffer(pix.samples, dtype=np.uint8).reshape(pix.h, pix.w, pix.n)
-    # 如果像素矩阵的通道数大于1，说明有颜色信息
+
+    arr = list(pix.samples)
+    arr = [int(b) for b in arr]  # 将字节转换为整数
+    arr = [arr[i:i+pix.n] for i in range(0, len(arr), pix.n)]  # 重塑列表形状
+
+    # 如果通道数大于1，说明存在颜色信息
     if pix.n > 1:
         # 计算每个像素的灰度值
-        gray = np.dot(arr[..., :3], [0.299, 0.587, 0.114])
+        gray = [[0.299 * pixel[0] + 0.587 * pixel[1] + 0.114 * pixel[2]] for pixel in arr]
         # 计算每个像素的颜色差异值
-        diff = np.abs(arr[..., :3] - gray[..., None]).sum(axis=2)
+        diff = [sum([abs(pixel[i] - gray[idx][0]) for i in range(pix.n)]) for idx, pixel in enumerate(arr)]
+
         # 如果颜色差异值的平均值大于某个阈值，说明页面为彩色页面
-        if np.any(diff > RGBDiff):
+        if any(value > RGBDiff for value in diff):
             return True
 
     # 否则，页面为非彩色页面

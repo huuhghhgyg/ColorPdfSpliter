@@ -61,8 +61,6 @@
             await pyodide.loadPackage('https://ghostscript.com/~julian/pyodide/PyMuPDF-1.23.5-cp311-none-emscripten_3_1_32_wasm32.whl');
             // await pyodide.loadPackage('PyMuPDF-1.23.5-cp311-none-emscripten_3_1_32_wasm32.whl');
             print('✅')
-            println('[3/3] 正在加载numpy...')
-            await micropip.install('numpy')
             pyodide.runPython(`
             import sys
             print(sys.version)
@@ -70,7 +68,6 @@
             import fitz
             print(fitz.version)
             `)
-            print('✅')
             println('库引用完成');
 
             //读取当前目录下的script.py文件
