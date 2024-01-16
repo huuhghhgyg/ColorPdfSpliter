@@ -29,8 +29,12 @@
         let pyodide;
 
         // 输出信息
-        function printMessage(message) {
-            document.getElementById('output').innerHTML += '<br>' + message;
+        function println(message) {
+            print('<br>' + message)
+        }
+
+        function print(message){
+            document.getElementById('output').innerHTML += message;
         }
 
         // 输出错误，后期可改造处理
@@ -46,33 +50,36 @@
                 //     printMessage(text);
                 // },
                 stderr: text => {
-                    printMessage(text);
+                    println(text);
                 }
             });
+            println('[1/3] 正在加载micropip...')
             await pyodide.loadPackage("micropip");
             const micropip = pyodide.pyimport("micropip");
-            printMessage('micropip 加载完成')
+            print('✅')
+            println('[2/3] 正在加载PyMuPDF...')
             await pyodide.loadPackage('https://ghostscript.com/~julian/pyodide/PyMuPDF-1.23.5-cp311-none-emscripten_3_1_32_wasm32.whl');
             // await pyodide.loadPackage('PyMuPDF-1.23.5-cp311-none-emscripten_3_1_32_wasm32.whl');
-            printMessage('PyMuPDF 加载完成')
+            print('✅')
+            println('[3/3] 正在加载numpy...')
             await micropip.install('numpy')
-            printMessage('numpy 加载完成')
             pyodide.runPython(`
-                import sys
-                print(sys.version)
-
-                import fitz
-                print(fitz.version)
+            import sys
+            print(sys.version)
+            
+            import fitz
+            print(fitz.version)
             `)
-            printMessage('库引用完成');
+            print('✅')
+            println('库引用完成');
 
             //读取当前目录下的script.py文件
             pyodide.runPython(await (await fetch("./ColorPdfSpliterWeb.py")).text());
-            printMessage('脚本加载完成');
+            println('脚本加载完成');
 
             // 显示上传按钮
             document.getElementById('file-input').disabled = false;
-            printMessage('✅准备就绪');
+            println('🆗准备就绪');
 
             return pyodide
         }
@@ -87,7 +94,7 @@
             var reader = new FileReader();
             reader.readAsBinaryString(file);
             reader.onload = async function (evt) {
-                printMessage('正在读取文件')
+                println('正在读取文件')
                 content = evt.target.result;
                 var output = pyodide.runPython('from js import content\ncontent');
                 var l = output.length;
@@ -97,7 +104,7 @@
                 }
 
                 pyodide.FS.writeFile(file.name, array);
-                printMessage('正在处理文件,请稍等...具体进度可以查看F12的控制台(console)')
+                println('正在处理文件,请稍等...具体进度可以查看F12的控制台(console)')
                 var state = undefined
                 try {
                     await pyodide.runPythonAsync(`
@@ -111,11 +118,11 @@
 
                 // 如果state不为undefined，说明处理失败
                 if (state !== undefined){
-                    printMessage('❌文件处理失败')
+                    println('❌文件处理失败')
                     return;
                 }
 
-                printMessage('✅文件处理完成')
+                println('✅文件处理完成')
 
                 // 去除'.pdf'后缀
                 let filenameContent = file.name.slice(0, -4)
@@ -130,7 +137,7 @@
             // 检查文件是否存在
             let fileExist = await pyodide.runPython(`os.path.exists("${link}")`)
             if (!fileExist) {
-                printMessage(`没有 ${filename}`)
+                println(`没有 ${filename}`)
                 return
             }
 
