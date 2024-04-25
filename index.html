@@ -2,9 +2,9 @@
 <html>
 
 <head>
-    <script src="https://cdn.jsdelivr.net/pyodide/v0.23.4/full/pyodide.js"></script>
     <!-- 编码 -->
     <meta charset="utf-8">
+    <script src="app.js"></script>
 </head>
 
 <body>
@@ -19,161 +19,17 @@
 
     <br>
 
+    <div id="progress">
+        <div><label>处理进度</label><span id="progress-text"></span></div>
+        <progress id="progress-bar" value="0" max="100"></progress>
+    </div>
+
+    <br>
+
     <div id="output">
         ⏳正在准备 Pyodide 和相关依赖...
     </div>
 
     <div id="download"></div>
-
-    <script type="text/javascript">
-        let pyodide;
-
-        // 输出信息
-        function println(message) {
-            print('<br>' + message)
-        }
-
-        function print(message){
-            document.getElementById('output').innerHTML += message;
-        }
-
-        // 输出错误，后期可改造处理
-        function printError(err_message) {
-            document.getElementById('output').innerHTML += '<br>发生错误:<br><span style="color: grey;">' + err_message + '</span>';
-        }
-
-        async function main() {
-            pyodide = await loadPyodide({
-                // indexURL: "https://cdn.jsdelivr.net/pyodide/v0.23.4/full/",
-                // fullStdLib: false,
-                // stdout: text => {
-                //     printMessage(text);
-                // },
-                stderr: text => {
-                    println(text);
-                }
-            });
-            println('[1/3] 正在加载micropip...')
-            await pyodide.loadPackage("micropip");
-            const micropip = pyodide.pyimport("micropip");
-            print('✅')
-            println('[2/3] 正在加载PyMuPDF...')
-            await pyodide.loadPackage('https://ghostscript.com/~julian/pyodide/PyMuPDF-1.23.5-cp311-none-emscripten_3_1_32_wasm32.whl');
-            // await pyodide.loadPackage('PyMuPDF-1.23.5-cp311-none-emscripten_3_1_32_wasm32.whl');
-            print('✅')
-            println('[3/3] 正在加载numpy...')
-            await micropip.install('numpy')
-            pyodide.runPython(`
-            import sys
-            print(sys.version)
-            
-            import fitz
-            print(fitz.version)
-            `)
-            print('✅')
-            println('库引用完成');
-
-            //读取当前目录下的script.py文件
-            pyodide.runPython(await (await fetch("./ColorPdfSpliterWeb.py")).text());
-            println('脚本加载完成');
-
-            // 显示上传按钮
-            document.getElementById('file-input').disabled = false;
-            println('🆗准备就绪');
-
-            return pyodide
-        }
-        main();
-
-        async function uploadFile() {
-            // 获取文件输入
-            const fileInput = document.getElementById('file-input');
-            const file = fileInput.files[0];
-
-            // Referred to https://github.com/pyodide/pyodide/issues/679
-            var reader = new FileReader();
-            reader.readAsBinaryString(file);
-            reader.onload = async function (evt) {
-                println('正在读取文件')
-                content = evt.target.result;
-                var output = pyodide.runPython('from js import content\ncontent');
-                var l = output.length;
-                var array = new Uint8Array(l);
-                for (var i = 0; i < l; i++) {
-                    array[i] = output.charCodeAt(i);
-                }
-
-                pyodide.FS.writeFile(file.name, array);
-                println('正在处理文件,请稍等...具体进度可以查看F12的控制台(console)')
-                var state = undefined
-                try {
-                    await pyodide.runPythonAsync(`
-                        splitPDF('${file.name}')
-                        # showAllFiles('/')
-                    `);
-                } catch (e) {
-                    state = e.message
-                    printError(e.message)
-                }
-
-                // 如果state不为undefined，说明处理失败
-                if (state !== undefined){
-                    println('❌文件处理失败')
-                    return;
-                }
-
-                println('✅文件处理完成')
-
-                // 去除'.pdf'后缀
-                let filenameContent = file.name.slice(0, -4)
-                await generateLink(`/home/pyodide/${filenameContent}_黑白.pdf`, `${filenameContent}_黑白.pdf`)
-                await generateLink(`/home/pyodide/${filenameContent}_彩色.pdf`, `${filenameContent}_彩色.pdf`)
-            }
-        }
-
-        async function generateLink(link, filename) {
-            // await pyodide.runPython(`print(getMD5("${link}"))`)
-
-            // 检查文件是否存在
-            let fileExist = await pyodide.runPython(`os.path.exists("${link}")`)
-            if (!fileExist) {
-                println(`没有 ${filename}`)
-                return
-            }
-
-            var array
-            try{
-                array = await pyodide.runPython(`
-                    with open('${link}', 'rb') as fh:
-                        arr = fh.read()
-                    import base64
-                    base64.b64encode(arr).decode('utf-8')
-                `);
-            }catch(e){
-                printError(e.message)
-                return
-            }
-
-            // Decode Base64 content to binary
-            const binaryContent = atob(array);
-
-            // Create a Uint8Array from the binary content
-            const arrayBuffer = new Uint8Array(binaryContent.length);
-            for (let i = 0; i < binaryContent.length; i++) {
-                arrayBuffer[i] = binaryContent.charCodeAt(i);
-            }
-
-            var blob = new Blob([arrayBuffer], { type: 'application/pdf' });
-            var elem = window.document.createElement('a');
-            elem.target = '_blank';
-            elem.href = window.URL.createObjectURL(blob);
-            elem.download = filename;
-            elem.innerText = filename;
-
-            // 输出
-            document.getElementById('download').innerHTML += '<br><span>下载</span>';
-            document.getElementById('download').appendChild(elem);
-        }
-    </script>
 
 </html>

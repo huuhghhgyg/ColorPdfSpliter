@@ -11,6 +11,10 @@ import glob  # 用于获取当前目录文件
 RGBDiff = 10  # RGB颜色总差异之和
 ExportDir = "./export"
 
+# 用于向js传递信息
+def logProgress(current, total):
+    print("检测页面：", current, "/", total)
+
 # 定义一个函数，判断一个页面是否为彩色页面
 def isColorPage(page):
     # 获取页面的像素矩阵
@@ -48,7 +52,7 @@ def splitPDF(filePath, exportdir=""):
     # 遍历原pdf文件中的每个页面
     for page in doc:
         count["page"] = count["page"] + 1
-        print("检测页面：", count["page"], "/", len(doc))
+        logProgress(count["page"], len(doc))
         # 判断页面是否为彩色页面
         if isColorPage(page):
             # 如果是，将页面添加到彩色pdf文件中
