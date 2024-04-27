@@ -1,36 +1,62 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
-    <!-- 编码 -->
-    <meta charset="utf-8">
-    <script src="./app.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ColorPdfSpliter</title>
+  <link rel="stylesheet" href="./style.css">
+  <script src="./app.js"></script>
+  <link rel="icon"
+    href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text x=%2250%%22 y=%2250%%22 style=%22dominant-baseline:central;text-anchor:middle;font-size:90px;%22>📁</text></svg>" />
 </head>
 
-<body>
-    <h1>ColorPdfSpliter with Pyodide</h1>
-
-    <p>提示：Web版内存占用较高，长期大批量处理建议使用Python版本</p>
-
-    <div class="uploads" style="display: flex; flex-direction: column;">
-        <label>打开PDF文件</label>
-        <input type="file" id="file-input" accept=".pdf" onchange="uploadFile()" disabled="disabled">
+<body class="bg-brown-container text-dark flex justify-center">
+  <!-- Content layout -->
+  <div class="flex-auto flex flex-col md:grid md:grid-cols-2 md:grid-rows-3 md:gap-x-4 lg:gap-x-8 p-4 md:p-8 lg:p-12 h-screen max-w-screen-2xl">
+    <!-- 标题 -->
+    <div class="md:col-span-2 lg:col-span-1 md:flex md:items-end md:mb-8">
+      <div id="title" class="mt-16 md:mt-0">
+        <h1 class="text-4xl md:text-5xl tracking-wide font-serif">Color Pdf Spliter</h1>
+        <h2 class="text-xl md:text-2xl leading-loose font-serif text-gray-600">with Pyodide</h2>
+      </div>
     </div>
 
-    <br>
+    <!-- 控件和下载 -->
+    <div class="mt-4 flex flex-col md:mt-0 md:row-span-2">
+      <!-- 控件 -->
+      <div class="">
+        <div id="uploads" class="max-w-1/3">
+          <h3>打开PDF文件</h3>
+          <input type="file" id="file-input" accept=".pdf" onchange="uploadFile()" disabled="disabled" />
+        </div>
 
-    <div id="progress">
-        <div><label>处理进度</label><span id="progress-text"></span></div>
-        <progress id="progress-bar" value="0" max="100"></progress>
+        <div id="progress" class="mt-4">
+          <div>
+            <h3 class="inline-block">处理进度</h3><span id="progress-text" class="ml-2 inline-block text-gray-600"></span>
+          </div>
+          <progress id="progress-bar" class="" value="0" max="100"></progress>
+        </div>
+        <p class="font-serif">💡提示：Web版内存占用较高，长期大批量处理建议使用Python版本</p>
+      </div>
+
+      <!-- 下载 -->
+      <div id="container-download" class="flex-auto mt-4 hidden flex flex-col overflow-hidden">
+        <h3>下载链接</h3>
+        <div id="download" class="flex-auto overflow-y-auto max-h-48 md:max-h-full">
+        </div>
+      </div>
     </div>
 
-    <br>
-
-    <div id="output">
+    <!-- 输出 -->
+    <div id="output" class="flex flex-col flex-auto rounded-md overflow-hidden mt-4
+      md:mt-0 md:col-start-2 md:row-start-2 md:row-span-2 lg:row-start-1 lg:row-span-3">
+      <div class="p-2 text-sm font-semibold bg-gray-900 text-gray-200">📋 输出</div>
+      <div id="console" class="flex-auto overflow-auto p-2 bg-gray-800 text-gray-300">
         ⏳正在准备 Pyodide 和相关依赖...
+      </div>
     </div>
-
-    <div id="download"></div>
+  </div>
 </body>
 
 </html>

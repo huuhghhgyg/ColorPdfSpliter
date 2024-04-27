@@ -132,7 +132,7 @@ function processFile(file) {
             return;
         }
 
-        println('✅文件处理完成')
+        println('✅文件处理完成，正在保存')
 
         // 去除'.pdf'后缀
         let filename = file.name.slice(0, -4)
