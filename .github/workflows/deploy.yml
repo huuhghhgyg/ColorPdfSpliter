@@ -1,6 +1,7 @@
 on:
   push:
-    branches: [web]
+    branches: 
+      - web
 
 jobs:
   publish:
