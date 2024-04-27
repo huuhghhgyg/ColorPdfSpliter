@@ -13,13 +13,15 @@
 
 <body class="bg-brown-container text-dark flex justify-center">
   <!-- Content layout -->
-  <div class="flex-auto flex flex-col md:grid md:grid-cols-2 md:grid-rows-3 md:gap-x-4 lg:gap-x-8 p-4 md:p-8 lg:p-12 h-screen max-w-screen-2xl">
+  <div class="flex-auto flex flex-col md:grid md:grid-cols-2 md:grid-rows-3 md:gap-x-4 md:p-8 
+    lg:gap-x-8 p-4 lg:p-12 h-screen max-w-screen-2xl">
     <!-- 标题 -->
-    <div class="md:col-span-2 lg:col-span-1 md:flex md:items-end md:mb-8">
-      <div id="title" class="mt-16 md:mt-0">
+    <div class="md:col-span-2 lg:col-span-1 md:flex md:flex-col justify-end md:mb-8">
+      <div id="title" class="mt-8 md:mt-0 md:flex md:items-end lg:flex-col lg:items-start">
         <h1 class="text-4xl lg:text-5xl tracking-wide font-serif">Color Pdf Spliter</h1>
-        <h2 class="text-xl lg:text-2xl leading-loose font-serif text-gray-600">with Pyodide</h2>
+        <h2 class="text-xl lg:text-2xl font-serif md:ml-2 lg:ml-0 text-gray-600">with Pyodide</h2>
       </div>
+      <p class="font-serif mt-2 lg:mt-4">将PDF的彩色页面与黑白页面分离📄</p>
     </div>
 
     <!-- 控件和下载 -->
@@ -31,9 +33,10 @@
           <input type="file" id="file-input" accept=".pdf" onchange="uploadFile()" disabled="disabled" />
         </div>
 
-        <div id="progress" class="mt-4">
+        <div id="progress" class="mt-2 lg:mt-4">
           <div>
-            <h3 class="inline-block">处理进度</h3><span id="progress-text" class="ml-2 inline-block text-gray-600"></span>
+            <h3 class="inline-block">处理进度</h3>
+            <span id="progress-text" class="ml-2 inline-block text-gray-600 font-mono"></span>
           </div>
           <progress id="progress-bar" class="" value="0" max="100"></progress>
         </div>
@@ -41,7 +44,7 @@
       </div>
 
       <!-- 下载 -->
-      <div id="container-download" class="flex-auto mt-4 hidden flex flex-col overflow-hidden">
+      <div id="container-download" class="flex-auto mt-2 lg:mt-4 hidden flex flex-col overflow-hidden">
         <h3>下载链接</h3>
         <div id="download" class="flex-auto overflow-y-auto max-h-48 md:max-h-full">
         </div>
@@ -51,8 +54,8 @@
     <!-- 输出 -->
     <div id="output" class="flex flex-col flex-auto rounded-md overflow-hidden mt-4
       md:mt-0 md:col-start-2 md:row-start-2 md:row-span-2 lg:row-start-1 lg:row-span-3">
-      <div class="p-2 text-sm font-semibold bg-gray-900 text-gray-200">📋 输出</div>
-      <div id="console" class="flex-auto overflow-auto p-2 bg-gray-800 text-gray-300">
+      <div class="p-2 text-sm font-semibold lg:px-4 bg-gray-900 text-gray-200">📋 输出</div>
+      <div id="console" class="flex-auto overflow-auto p-2 lg:p-4 bg-gray-800 text-gray-300">
         ⏳正在准备 Pyodide 和相关依赖...
       </div>
     </div>

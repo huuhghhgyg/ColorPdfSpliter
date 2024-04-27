@@ -7,7 +7,7 @@
 } */
 
 h3 {
-  @apply font-bold text-dark;
+  @apply font-bold font-serif text-brown-accent;
 }
 
 progress[value]::-webkit-progress-bar {
@@ -19,7 +19,7 @@ progress[value]::-webkit-progress-value {
 }
 
 #download a {
-  @apply text-brown-accent underline;
+  @apply text-dark underline font-serif;
 }
 
 .error {
