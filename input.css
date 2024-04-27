@@ -26,14 +26,6 @@ progress[value]::-webkit-progress-value {
   @apply text-gray-500;
 }
 
-/* input[type="file"]{
-  @apply bg-dark text-white;
-} */
-
-/* input[type="file"]::-webkit-file-upload-button{
-  @apply bg-dark text-white border-none p-2;
-} */
-
 .max-h-auto {
   max-height: unset;
 }
