@@ -6,7 +6,7 @@
 
 (我校打印店黑白打印0.2元/张，彩色打印1元/张。彩色打印课程作业或者什么其他的文件的时候能省很多钱。这个程序有巨大的实用价值🤑)
 
-临时使用可以尝试在线版 [ColorPdfSpliter Web](https://huuhghhgyg.github.io/ColorPdfSpliter/)，在线版多次处理文件时会占用大量内存，建议使用本地版本。
+临时使用可以尝试[在线版 ColorPdfSpliter](https://colorpdfspliter.pages.dev)，在线版多次处理文件时会占用大量内存，建议使用本地版本。
 
 > 如果你也觉得这是个好东西就给颗⭐呗？
 
