@@ -8,7 +8,7 @@ import numpy as np  # 用于处理数组
 import glob  # 用于获取当前目录文件
 
 # 参数设置
-RGBDiff = 10  # RGB颜色总差异之和
+RGBDiff = 30  # RGB颜色总差异之和
 ExportDir = './export'
 
 # 定义一个函数，判断一个页面是否为彩色页面
