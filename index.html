@@ -56,9 +56,33 @@
     <!-- 输出 -->
     <div id="output" class="flex flex-col flex-auto rounded-md overflow-hidden mt-4
       md:mt-0 md:col-start-2 md:row-start-2 md:row-span-2 lg:row-start-1 lg:row-span-3">
-      <div class="p-2 text-sm font-semibold lg:px-4 bg-gray-900 text-gray-200">📋 输出</div>
+      <div class="flex p-2 text-sm font-semibold lg:px-4 bg-gray-900 text-gray-200">
+        <span class="flex-1">📋 输出</span>
+        <button id="openDialogBtn">⚙ 设置</button>
+      </div>
       <div id="console" class="flex-auto overflow-auto p-2 lg:p-4 bg-gray-800 text-gray-300">
         ⏳正在准备 Pyodide 和相关依赖...
+      </div>
+    </div>
+  </div>
+
+  <!-- Dialog -->
+  <div id="dialog" class="fixed hidden inset-0 flex items-center justify-center bg-gray-800 bg-opacity-75">
+    <div class="bg-white rounded-lg shadow-lg w-3/4 md:w-1/2 relative">
+      <div class="px-6 py-4 border-b border-gray-300 flex">
+        <h2 class="flex-1 text-lg font-semibold text-dark">Setting</h2>
+        <!-- × -->
+        <button id="closeDialogBtn" class="text-gray-500 hover:text-gray-700 focus:outline-none">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+      <div class="p-6">
+        <label for="variance" class="block mb-2 text-sm font-medium text-dark">RGBDiff（颜色差值）</label>
+        <input type="number" id="rgb-diff"
+          class="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-brown-container"
+          placeholder="30">
       </div>
     </div>
   </div>

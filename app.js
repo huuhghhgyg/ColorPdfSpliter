@@ -57,8 +57,38 @@ function initComponents() {
     // 设置上传按钮
     const fileInput = document.getElementById('file-input');
     fileInput.onchange = function () {
+        pythonWorker.postMessage({ f: 'setValue', args: ['RGBDiff', parseInt(rgbDiffText.value)] }); // 设置RGBDiff
+        println(`▶RGBDiff参数设置为 ${rgbDiffText.value}`)
+
         pythonWorker.postMessage({ f: 'processFile', args: fileInput.files[0] });
     }
+
+    // 设置弹窗
+    const openDialogButton = document.getElementById('openDialogBtn');
+    const dialog = document.getElementById('dialog');
+    const closeDialogButton = document.getElementById('closeDialogBtn');
+
+    openDialogButton.addEventListener('click', () => {
+        dialog.classList.remove('hidden');
+    });
+
+    closeDialogButton.addEventListener('click', () => {
+        dialog.classList.add('hidden');
+    });
+
+    // 设置默认参数值
+    const rgbDiffDefault = 30; //默认值
+    const rgbDiffText = document.getElementById('rgb-diff');
+    rgbDiffText.value = rgbDiffDefault;
+
+    // 初始化参数设置文本框
+    rgbDiffText.addEventListener('change', () => {
+        const rgbDiff = parseInt(rgbDiffText.value);
+        if (rgbDiff < 0 || rgbDiff > 255) {
+            alert('Variance value should be in range [0, 255]');
+            rgbDiffText.value = rgbDiffDefault;
+        }
+    });
 }
 
 // 定义worker

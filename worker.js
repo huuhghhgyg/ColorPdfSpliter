@@ -140,3 +140,8 @@ function processFile(file) {
         await generateLink(`/home/pyodide/${filename}_彩色.pdf`, `${filename}_彩色.pdf`)
     }
 }
+
+function setValue(key_value) {
+    // console.log('worker set', key_value[0], 'to', key_value[1], 'value type', typeof(key_value[1]))
+    pyodide.globals.set(key_value[0], key_value[1])
+}
