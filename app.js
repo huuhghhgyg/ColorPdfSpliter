@@ -58,12 +58,12 @@ function initComponents() {
     const fileInput = document.getElementById('file-input');
     fileInput.onchange = function () {
         pythonWorker.postMessage({ f: 'setValue', args: ['RGBDiff', parseInt(rgbDiffText.value)] }); // 设置RGBDiff
-        println(`▶RGBDiff参数设置为 ${rgbDiffText.value}`)
+        println(`☑RGBDiff参数设置为 ${rgbDiffText.value}`)
 
         pythonWorker.postMessage({ f: 'processFile', args: fileInput.files[0] });
     }
 
-    // 设置弹窗
+    // 设置对话框
     const openDialogButton = document.getElementById('openDialogBtn');
     const dialog = document.getElementById('dialog');
     const closeDialogButton = document.getElementById('closeDialogBtn');
@@ -75,6 +75,12 @@ function initComponents() {
     closeDialogButton.addEventListener('click', () => {
         dialog.classList.add('hidden');
     });
+
+    document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape') {
+            dialog.classList.add('hidden');
+        }
+    }); // 按下ESC关闭对话框
 
     // 设置默认参数值
     const rgbDiffDefault = 30; //默认值
