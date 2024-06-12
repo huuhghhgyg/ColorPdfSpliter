@@ -6,13 +6,36 @@ onmessage = function (e) {
 // Setup your project to serve `py-worker.js`. You should also serve
 // `pyodide.js`, and all its associated `.asm.js`, `.json`,
 // and `.wasm` files as well:
-importScripts("https://cdn.jsdelivr.net/pyodide/v0.25.1/full/pyodide.js");
+
+async function checkJsdelivrConnectivity() {
+    try {
+        const response = await fetch('https://cdn.jsdelivr.net/pyodide/v0.25.1/full/pyodide.js', { method: 'HEAD' });
+        return response.ok;
+    } catch (error) {
+        console.log(error)
+        return false;
+    }
+}
+
+async function importPyodide() {
+    const jsdelivrAccessible = await checkJsdelivrConnectivity();
+    if (jsdelivrAccessible) {
+        importScripts("https://cdn.jsdelivr.net/pyodide/v0.25.1/full/pyodide.js");
+        println('🔗正在通过jsDelivr获取pyodide...')
+    } else {
+        importScripts("https://proxy.zhhuu.top/cdn/pyodide/v0.25.1/full/pyodide.js");
+        println('🔗正在通过镜像获取pyodide...')
+    }
+
+    return
+}
 
 println = (text) => postMessage({ f: 'println', args: text });
 print = (text) => postMessage({ f: 'print', args: text });
 printError = (text) => postMessage({ f: 'printError', args: text });
 
 async function main() {
+    await importPyodide();
     pyodide = await loadPyodide({
         // indexURL: "https://cdn.jsdelivr.net/pyodide/v0.23.4/full/",
         // fullStdLib: false,
