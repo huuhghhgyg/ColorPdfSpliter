@@ -84,7 +84,7 @@ function initComponents() {
     // 初始化参数设置文本框
     rgbDiffText.addEventListener('change', () => {
         const rgbDiff = parseInt(rgbDiffText.value);
-        if (rgbDiff < 0 || rgbDiff > 255) {
+        if (rgbDiff < 0 || rgbDiff > 255 || isNaN(rgbDiff)) {
             alert('Variance value should be in range [0, 255]');
             rgbDiffText.value = rgbDiffDefault;
         }
