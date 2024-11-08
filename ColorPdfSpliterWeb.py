@@ -3,7 +3,7 @@
 # 导入需要的模块
 import os
 
-import fitz  # 用于处理pdf文件
+import pymupdf  # 用于处理pdf文件
 import numpy as np  # 用于处理数组
 import glob  # 用于获取当前目录文件
 
@@ -43,10 +43,10 @@ def splitPDF(filePath, exportdir=""):
     }
 
     # 打开一个pdf文件
-    doc = fitz.open(filePath)
+    doc = pymupdf.open(filePath)
     # 创建两个空的pdf文件，用于保存彩色页面和非彩色页面
-    color_doc = fitz.open()
-    gray_doc = fitz.open()
+    color_doc = pymupdf.open()
+    gray_doc = pymupdf.open()
 
     count = {"page": 0, "gray": 0, "color": 0}
     # 遍历原pdf文件中的每个页面
@@ -80,25 +80,3 @@ def splitPDF(filePath, exportdir=""):
 
 # 总流程
 # web版总流程交给js处理
-
-# debug
-
-# import hashlib
-# def getMD5(filename):
-#     with open(filename, "rb") as f:
-#         bytes = f.read()  # read file as bytes
-#         readable_hash = hashlib.md5(bytes).hexdigest()
-#         return readable_hash
-
-# 显示指定目录下的所有文件名 (debug)
-# def showAllFiles(path):
-#     # 遍历该目录下的所有文件名
-#     for filename in os.listdir(path):
-#         # 获取文件的完整路径
-#         filepath = os.path.join(path, filename)
-#         # 如果是文件，直接打印文件名
-#         if os.path.isfile(filepath):
-#             print(filepath)
-#         # 如果是目录，则递归调用函数
-#         elif os.path.isdir(filepath):
-#             showAllFiles(filepath)

@@ -54,7 +54,8 @@ async function main() {
     println('[2/3] 正在加载PyMuPDF...')
     // Build a wheel for pyodide: https://pymupdf.readthedocs.io/en/latest/pyodide.html
     // await pyodide.loadPackage('https://ghostscript.com/~julian/pyodide/PyMuPDF-1.23.5-cp311-none-emscripten_3_1_32_wasm32.whl');
-    await pyodide.loadPackage('PyMuPDF-1.23.5-cp311-none-emscripten_3_1_32_wasm32.whl');
+    // await pyodide.loadPackage('PyMuPDF-1.23.5-cp311-none-emscripten_3_1_32_wasm32.whl');
+    await pyodide.loadPackage('PyMuPDF-1.24.8-cp311-none-emscripten_3_1_32_wasm32.whl');
     print('✅')
     println('[3/3] 正在加载numpy...')
     await micropip.install('numpy')
@@ -89,32 +90,18 @@ async function generateLink(link, filename) {
         return
     }
 
-    var array
     try {
-        array = await pyodide.runPython(`
-                    with open('${link}', 'rb') as fh:
-                        arr = fh.read()
-                    import base64
-                    base64.b64encode(arr).decode('utf-8')
-                `);
+        // Get the file content as Uint8Array
+        const fileContent = pyodide.FS.readFile(link, { encoding: 'binary' });
+        
+        // Create blob directly from Uint8Array
+        const blob = new Blob([fileContent], { type: 'application/pdf' });
+
+        // 输出
+        postMessage({ f: "generateFileLink", args: [filename, blob] });
     } catch (e) {
-        printError(e.message)
-        return
+        printError(e.message);
     }
-
-    // Decode Base64 content to binary
-    const binaryContent = atob(array);
-
-    // Create a Uint8Array from the binary content
-    const arrayBuffer = new Uint8Array(binaryContent.length);
-    for (let i = 0; i < binaryContent.length; i++) {
-        arrayBuffer[i] = binaryContent.charCodeAt(i);
-    }
-
-    var blob = new Blob([arrayBuffer], { type: 'application/pdf' });
-
-    // 输出
-    postMessage({ f: "generateFileLink", args: [filename, blob] })
 }
 
 
