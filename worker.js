@@ -54,7 +54,6 @@ async function main() {
     println('[2/3] 正在加载PyMuPDF...')
     // Build a wheel for pyodide: https://pymupdf.readthedocs.io/en/latest/pyodide.html
     // await pyodide.loadPackage('https://ghostscript.com/~julian/pyodide/PyMuPDF-1.23.5-cp311-none-emscripten_3_1_32_wasm32.whl');
-    // await pyodide.loadPackage('PyMuPDF-1.23.5-cp311-none-emscripten_3_1_32_wasm32.whl');
     await pyodide.loadPackage('PyMuPDF-1.24.8-cp311-none-emscripten_3_1_32_wasm32.whl');
     print('✅')
     println('[3/3] 正在加载numpy...')
