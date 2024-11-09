@@ -104,7 +104,7 @@ if __name__ == "__main__":
             os.mkdir(ExportDir)
 
         for i in range(len(pdf_list)):
-            print("[", i + 1, "/", len(pdf_list), "] 正在处理:", pdf_list[i])
+            print(f"[{i + 1}/{len(pdf_list)}] 正在处理: {pdf_list[i]}")
             splitPDF(pdf_list[i], "./export/")
             print("\n")
 
