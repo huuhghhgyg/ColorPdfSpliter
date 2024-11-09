@@ -3,7 +3,7 @@
 # 导入需要的模块
 import os
 
-import fitz  # 用于处理pdf文件
+import pymupdf  # 用于处理pdf文件
 import numpy as np  # 用于处理数组
 import glob  # 用于获取当前目录文件
 
@@ -31,6 +31,16 @@ def isColorPage(page):
     return False
 
 
+LEN_TITLE = 30  # title长度
+
+def progress_bar(value, total=100, title="Complete"):
+    percent = (value / total) * 100
+    bar = "█" * int(percent // 2) + "-" * (50 - int(percent // 2))
+    if len(title) > LEN_TITLE:
+        title = title[:LEN_TITLE] + "..."
+    print(f"\r|{bar}| {value}/{total} {title}", end="\r" if value < total else "\n")
+
+
 def splitPDF(file, exportdir=''):
     # 文件名设置
     filename = {
@@ -40,16 +50,18 @@ def splitPDF(file, exportdir=''):
     }
 
     # 打开一个pdf文件
-    doc = fitz.open(file)
+    doc = pymupdf.open(file)
     # 创建两个空的pdf文件，用于保存彩色页面和非彩色页面
-    color_doc = fitz.open()
-    gray_doc = fitz.open()
+    color_doc = pymupdf.open()
+    gray_doc = pymupdf.open()
 
     count = {'page': 0, 'gray': 0, 'color': 0}
     # 遍历原pdf文件中的每个页面
     for page in doc:
         count['page'] = count['page'] + 1
-        print("检测页面：", count['page'],'/',len(doc))
+        # print("检测页面：", count['page'],'/',len(doc))
+        progress_bar(count['page'], len(doc), doc.name)
+
         # 判断页面是否为彩色页面
         if isColorPage(page):
             # 如果是，将页面添加到彩色pdf文件中
@@ -75,26 +87,26 @@ def splitPDF(file, exportdir=''):
     else:
         print('文件', filename['input'], '分割后不存在彩色页面，不保存文件')
 
-
 # 总流程
-pdf_list = glob.glob('*.pdf')
-if len(pdf_list) == 0:  # 没有pdf文件
-    print('未检测到当前目录中存在pdf文件')
-    os.system('pause')
-    exit()
+if __name__ == "__main__":
+    pdf_list = glob.glob("*.pdf")
+    if len(pdf_list) == 0:  # 没有pdf文件
+        print("未检测到当前目录中存在pdf文件")
+        os.system("pause")
+        exit()
 
-if len(pdf_list) > 1:
-    # 判断批量输出目录是否存在
-    if not os.path.exists(ExportDir):
-        os.mkdir(ExportDir)
+    if len(pdf_list) > 1:
+        # 判断批量输出目录是否存在
+        if not os.path.exists(ExportDir):
+            os.mkdir(ExportDir)
 
-    for i in range(len(pdf_list)):
-        print('[', i + 1, '/', len(pdf_list), '] 正在处理:', pdf_list[i])
-        splitPDF(pdf_list[i],'./export/')
-        print('\n')
+        for i in range(len(pdf_list)):
+            print("[", i + 1, "/", len(pdf_list), "] 正在处理:", pdf_list[i])
+            splitPDF(pdf_list[i], "./export/")
+            print("\n")
 
-    print('多项文件已保存至',ExportDir)
-elif len(pdf_list) == 1:
-    splitPDF(pdf_list[0])
+        print("多项文件已保存至", ExportDir)
+    elif len(pdf_list) == 1:
+        splitPDF(pdf_list[0])
 
-print("已完成")
+    print("已完成")
