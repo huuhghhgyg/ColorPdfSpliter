@@ -9,7 +9,8 @@ import glob  # 用于获取当前目录文件
 
 # 参数设置
 RGBDiff = 30  # RGB颜色总差异之和
-ExportDir = './export'
+ExportDir = "./export"
+
 
 # 定义一个函数，判断一个页面是否为彩色页面
 def isColorPage(page):
@@ -33,6 +34,7 @@ def isColorPage(page):
 
 LEN_TITLE = 30  # title长度
 
+
 def progress_bar(value, total=100, title="Complete"):
     percent = (value / total) * 100
     bar = "█" * int(percent // 2) + "-" * (50 - int(percent // 2))
@@ -41,12 +43,12 @@ def progress_bar(value, total=100, title="Complete"):
     print(f"\r|{bar}| {value}/{total} {title}", end="\r" if value < total else "\n")
 
 
-def splitPDF(file, exportdir=''):
+def splitPDF(file, exportdir=""):
     # 文件名设置
     filename = {
-        'input': file,
-        'graypages': file[:-4] + '_黑白.pdf',
-        'colorpages': file[:-4] + '_彩色.pdf'
+        "input": file,
+        "graypages": file[:-4] + "_黑白.pdf",
+        "colorpages": file[:-4] + "_彩色.pdf",
     }
 
     # 打开一个pdf文件
@@ -55,37 +57,38 @@ def splitPDF(file, exportdir=''):
     color_doc = pymupdf.open()
     gray_doc = pymupdf.open()
 
-    count = {'page': 0, 'gray': 0, 'color': 0}
+    count = {"page": 0, "gray": 0, "color": 0}
     # 遍历原pdf文件中的每个页面
     for page in doc:
-        count['page'] = count['page'] + 1
+        count["page"] = count["page"] + 1
         # print("检测页面：", count['page'],'/',len(doc))
-        progress_bar(count['page'], len(doc), doc.name)
+        progress_bar(count["page"], len(doc), doc.name)
 
         # 判断页面是否为彩色页面
         if isColorPage(page):
             # 如果是，将页面添加到彩色pdf文件中
             color_doc.insert_pdf(doc, from_page=page.number, to_page=page.number)
-            count['color'] = count['color'] + 1
+            count["color"] = count["color"] + 1
         else:
             # 如果不是，将页面添加到非彩色pdf文件中
             gray_doc.insert_pdf(doc, from_page=page.number, to_page=page.number)
-            count['gray'] = count['gray'] + 1
+            count["gray"] = count["gray"] + 1
 
     # 保存两个pdf文件
     # 保存灰色页面
-    if count['gray']>0:
-        print("正在保存灰色页面(共", count['gray'], "页):", filename['graypages'])
-        gray_doc.save(exportdir + filename['graypages'])
+    if count["gray"] > 0:
+        print("正在保存灰色页面(共", count["gray"], "页):", filename["graypages"])
+        gray_doc.save(exportdir + filename["graypages"])
     else:
-        print('文件',filename['input'],'分割后不存在灰色页面，不保存文件')
+        print("文件", filename["input"], "分割后不存在灰色页面，不保存文件")
 
     # 保存彩色页面
-    if count['color']>0:
-        print("正在保存彩色页面(共", count['color'], "页):", filename['colorpages'])
-        color_doc.save(exportdir + filename['colorpages'])
+    if count["color"] > 0:
+        print("正在保存彩色页面(共", count["color"], "页):", filename["colorpages"])
+        color_doc.save(exportdir + filename["colorpages"])
     else:
-        print('文件', filename['input'], '分割后不存在彩色页面，不保存文件')
+        print("文件", filename["input"], "分割后不存在彩色页面，不保存文件")
+
 
 # 总流程
 if __name__ == "__main__":
