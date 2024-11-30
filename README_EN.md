@@ -35,7 +35,7 @@ Linux users should be relatively rare, so using the command line is also very co
 2. Install dependency packages
 
     ```Bash
-    pip install PyMuPDF numpy
+    pip install PyMuPDF==1.24.14 numpy
     ```
 
 3. **Run**: Same as the operating method for Windows, put all PDF files to be processed in the current directory, and execute

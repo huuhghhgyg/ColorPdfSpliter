@@ -30,7 +30,7 @@ Linux用户应该比较少吧，直接用命令行也很方便😋
 
 2. 安装依赖包
     ```sh
-    pip install PyMuPDF numpy
+    pip install PyMuPDF==1.24.14 numpy
     ```
 
 3. **运行：** 和Windows的操作方法一样，将所有需要处理的PDF文件丢进当前目录中，执行

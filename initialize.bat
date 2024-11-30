@@ -1,4 +1,4 @@
-pip install PyMuPDF numpy
+pip install PyMuPDF==1.24.14 numpy
 
 @REM 修复
 @REM pip uninstall fitz
