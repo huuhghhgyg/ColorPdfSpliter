@@ -30,11 +30,11 @@ function setOutputSwitch() {
         if (state) {
             // 设置outputDiv为隐藏
             outputDiv.style.bottom = '0';
-            switcher.innerText = '🔽收起';
+            switcher.innerText = '🔽 收起';
         } else {
             // 设置outputDiv为显示
             outputDiv.style.bottom = '-' + consoleDiv.clientHeight + 'px';
-            switcher.innerText = '🔼展开';
+            switcher.innerText = '🔼 展开';
         }
         isOutputOpen = state;
     }
