@@ -29,3 +29,8 @@ progress[value]::-webkit-progress-value {
 .max-h-auto {
   max-height: unset;
 }
+
+.dim{
+  /* 缩小、变暗 */
+  @apply brightness-75 scale-90 rounded-xl;
+}

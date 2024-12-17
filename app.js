@@ -53,6 +53,10 @@ function enableComponents() {
     document.getElementById('file-input').disabled = false;
 }
 
+function switchConsole(isOpen){
+    window.switchOutput(isOpen);
+}
+
 function initComponents() {
     // 设置上传按钮
     const fileInput = document.getElementById('file-input');

@@ -75,6 +75,7 @@ async function main() {
     // 显示上传按钮
     postMessage({ f: "enableComponents" })
     println('🆗准备就绪');
+    postMessage({ f: "switchConsole", args: false })
 
     return pyodide
 }
@@ -92,7 +93,7 @@ async function generateLink(link, filename) {
     try {
         // Get the file content as Uint8Array
         const fileContent = pyodide.FS.readFile(link, { encoding: 'binary' });
-        
+
         // Create blob directly from Uint8Array
         const blob = new Blob([fileContent], { type: 'application/pdf' });
 
