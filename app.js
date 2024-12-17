@@ -53,7 +53,7 @@ function enableComponents() {
     document.getElementById('file-input').disabled = false;
 }
 
-function switchConsole(isOpen){
+function switchConsole(isOpen) {
     window.switchOutput(isOpen);
 }
 
@@ -116,6 +116,7 @@ pythonWorker.onmessage = function (e) {
 };
 
 // 页面加载完成
-window.onload = function () {
+// 多个js文件都是用window.onload会覆盖，所以这里使用DOMContentLoaded
+document.addEventListener('DOMContentLoaded', function () {
     initComponents();
-}
+});

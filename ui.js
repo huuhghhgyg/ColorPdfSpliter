@@ -1,7 +1,6 @@
-window.onload = function () {
+document.addEventListener('DOMContentLoaded', function() {
     setOutputSwitch();
-    // 模拟点击switchOutputBtn
-}
+});
 
 function ge_md() {
     // 大于尺寸md
