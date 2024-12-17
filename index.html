@@ -6,12 +6,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ColorPdfSpliter</title>
   <link rel="stylesheet" href="./style.css">
-  <script src="./app.js"></script>
+  <!-- <script src="./app.js"></script> -->
+  <script src="./ui.js"></script>
   <link rel="icon"
     href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text x=%2250%%22 y=%2250%%22 style=%22dominant-baseline:central;text-anchor:middle;font-size:90px;%22>📁</text></svg>" />
 </head>
 
-<body class="bg-brown-container text-dark flex justify-center">
+<!-- <body class="bg-brown-container text-dark flex justify-center overflow-hidden"> -->
+<body class="bg-brown-container text-dark flex justify-center overflow-hidden">
   <!-- Content layout -->
   <div class="flex-auto flex flex-col md:grid md:grid-cols-2 md:grid-rows-3 md:gap-x-4 md:p-8 
     lg:gap-x-8 p-4 lg:p-12 h-screen max-w-screen-2xl">
@@ -54,11 +56,15 @@
     </div>
 
     <!-- 输出 -->
-    <div id="output" class="flex flex-col flex-auto rounded-md overflow-hidden mt-4
+    <div id="output" class="absolute h-3/4 w-full left-0 -bottom-full transition-[bottom] duration-300 rounded-t-md
+      md:h-auto md:bottom-0 md:static md:rounded-b-md
+      flex flex-col flex-auto overflow-hidden
       md:mt-0 md:col-start-2 md:row-start-2 md:row-span-2 lg:row-start-1 lg:row-span-3">
-      <div class="flex p-2 text-sm font-semibold lg:px-4 bg-gray-900 text-gray-200">
-        <span class="flex-1">📋 输出</span>
+      <div id="output-title" class="flex p-2 text-sm font-semibold lg:px-4 bg-gray-900 text-gray-200">
+        <span class="flex-1">📋 输出
+        </span>
         <button id="openDialogBtn">⚙ 设置</button>
+        <button id="switchOutputBtn" class="ml-2 md:hidden">🔼🔽显示</button>
       </div>
       <div id="console" class="flex-auto overflow-auto p-2 lg:p-4 bg-gray-800 text-gray-300">
         ⏳正在准备 Pyodide 和相关依赖...
