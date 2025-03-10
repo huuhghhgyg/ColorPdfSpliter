@@ -2,6 +2,7 @@
 
 # 导入需要的模块
 import os
+import sys
 
 import pymupdf  # 用于处理pdf文件
 import numpy as np  # 用于处理数组
@@ -43,7 +44,7 @@ def progress_bar(value, total=100, title="Complete"):
     print(f"\r|{bar}| {value}/{total} {title}", end="\r" if value < total else "\n")
 
 
-def splitPDF(file, exportdir=""):
+def splitPDF(file, exportdir="", duplex = False):
     # 文件名设置
     filename = {
         "input": file,
@@ -59,20 +60,43 @@ def splitPDF(file, exportdir=""):
 
     count = {"page": 0, "gray": 0, "color": 0}
     # 遍历原pdf文件中的每个页面
-    for page in doc:
-        count["page"] = count["page"] + 1
-        # print("检测页面：", count['page'],'/',len(doc))
-        progress_bar(count["page"], len(doc), doc.name)
 
-        # 判断页面是否为彩色页面
-        if isColorPage(page):
-            # 如果是，将页面添加到彩色pdf文件中
-            color_doc.insert_pdf(doc, from_page=page.number, to_page=page.number)
-            count["color"] = count["color"] + 1
-        else:
-            # 如果不是，将页面添加到非彩色pdf文件中
-            gray_doc.insert_pdf(doc, from_page=page.number, to_page=page.number)
-            count["gray"] = count["gray"] + 1
+    #双面打印
+    if duplex:
+        for idx in range(0, len(doc), 2):
+            if idx == len(doc)-1:
+                front_page = doc[idx]
+                back_page = doc[idx]
+            else:
+                front_page = doc[idx]
+                back_page = doc[idx+1]
+            # 判断正反两面是否有彩色页面
+            if isColorPage(front_page) or isColorPage(back_page):
+                # 如果有，将正反两页添加到彩色pdf文件中
+                color_doc.insert_pdf(doc, from_page=front_page.number, to_page=back_page.number)
+                count["color"] = count["color"] + 2
+            else:
+                # 如果没有，将正反两页添加到非彩色pdf文件中
+                gray_doc.insert_pdf(doc, from_page=front_page.number, to_page=back_page.number)
+                count["gray"] = count["gray"] + 2
+            count["page"] = count["page"] + 2
+            # print("检测页面：", count['page'],'/',len(doc))
+            progress_bar(count["page"], len(doc), doc.name)
+    else:
+        for page in doc:
+            count["page"] = count["page"] + 1
+            # print("检测页面：", count['page'],'/',len(doc))
+            progress_bar(count["page"], len(doc), doc.name)
+
+            # 判断页面是否为彩色页面
+            if isColorPage(page):
+                # 如果是，将页面添加到彩色pdf文件中
+                color_doc.insert_pdf(doc, from_page=page.number, to_page=page.number)
+                count["color"] = count["color"] + 1
+            else:
+                # 如果不是，将页面添加到非彩色pdf文件中
+                gray_doc.insert_pdf(doc, from_page=page.number, to_page=page.number)
+                count["gray"] = count["gray"] + 1
 
     # 保存两个pdf文件
     # 保存灰色页面
@@ -93,10 +117,17 @@ def splitPDF(file, exportdir=""):
 # 总流程
 if __name__ == "__main__":
     pdf_list = glob.glob("*.pdf")
+
     if len(pdf_list) == 0:  # 没有pdf文件
         print("未检测到当前目录中存在pdf文件")
         os.system("pause")
         exit()
+    
+    #判断是否双面打印
+    if sys.argv[-1]=="duplex":
+        if_duplex = True
+    else:
+        if_duplex = False
 
     if len(pdf_list) > 1:
         # 判断批量输出目录是否存在
@@ -105,11 +136,11 @@ if __name__ == "__main__":
 
         for i in range(len(pdf_list)):
             print(f"[{i + 1}/{len(pdf_list)}] 正在处理: {pdf_list[i]}")
-            splitPDF(pdf_list[i], "./export/")
+            splitPDF(pdf_list[i], "./export/", duplex = if_duplex)
             print("\n")
 
         print("多项文件已保存至", ExportDir)
     elif len(pdf_list) == 1:
-        splitPDF(pdf_list[0])
+        splitPDF(pdf_list[0], duplex = if_duplex)
 
     print("已完成")
