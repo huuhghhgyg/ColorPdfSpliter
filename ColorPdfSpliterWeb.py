@@ -10,6 +10,7 @@ import glob  # 用于获取当前目录文件
 # 参数设置
 RGBDiff = 30  # RGB颜色总差异之和
 ExportDir = "./export"
+duplex = False
 
 # 用于向js传递信息
 def logProgress(current, total):
@@ -49,19 +50,35 @@ def splitPDF(filePath, exportdir=""):
     gray_doc = pymupdf.open()
 
     count = {"page": 0, "gray": 0, "color": 0}
-    # 遍历原pdf文件中的每个页面
-    for page in doc:
-        count["page"] = count["page"] + 1
-        logProgress(count["page"], len(doc))
-        # 判断页面是否为彩色页面
-        if isColorPage(page):
-            # 如果是，将页面添加到彩色pdf文件中
-            color_doc.insert_pdf(doc, from_page=page.number, to_page=page.number)
-            count["color"] = count["color"] + 1
-        else:
-            # 如果不是，将页面添加到非彩色pdf文件中
-            gray_doc.insert_pdf(doc, from_page=page.number, to_page=page.number)
-            count["gray"] = count["gray"] + 1
+    # 根据是否双面打印，遍历页面
+    if duplex:
+        for idx in range(0, len(doc), 2):
+            if idx == len(doc) - 1:
+                front_page = doc[idx]
+                back_page = doc[idx]
+            else:
+                front_page = doc[idx]
+                back_page = doc[idx + 1]
+            # 判断正反两面是否有彩色页面
+            if isColorPage(front_page) or isColorPage(back_page):
+                color_doc.insert_pdf(doc, from_page=front_page.number, to_page=back_page.number)
+                count["color"] += 2
+            else:
+                gray_doc.insert_pdf(doc, from_page=front_page.number, to_page=back_page.number)
+                count["gray"] += 2
+            count["page"] += 2
+            logProgress(count["page"], len(doc))
+    else:
+        for page in doc:
+            count["page"] += 1
+            logProgress(count["page"], len(doc))
+            # 判断页面是否为彩色页面
+            if isColorPage(page):
+                color_doc.insert_pdf(doc, from_page=page.number, to_page=page.number)
+                count["color"] += 1
+            else:
+                gray_doc.insert_pdf(doc, from_page=page.number, to_page=page.number)
+                count["gray"] += 1
 
     # 保存两个pdf文件
     # 保存灰色页面

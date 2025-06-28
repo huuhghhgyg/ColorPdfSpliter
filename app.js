@@ -90,6 +90,8 @@ function initComponents() {
     const rgbDiffDefault = 30; //默认值
     const rgbDiffText = document.getElementById('rgb-diff');
     rgbDiffText.value = rgbDiffDefault;
+    // 双面打印选项
+    const duplexCheckbox = document.getElementById('duplex-checkbox');
 
     // 初始化参数设置文本框
     rgbDiffText.addEventListener('change', () => {
@@ -99,6 +101,32 @@ function initComponents() {
             rgbDiffText.value = rgbDiffDefault;
         }
     });
+    // 文件选择处理
+    fileInput.onchange = function () {
+        // 传递 RGBDiff
+        pythonWorker.postMessage({ f: 'setValue', args: ['RGBDiff', parseInt(rgbDiffText.value)] });
+        println(`☑RGBDiff 参数设置为 ${rgbDiffText.value}`);
+        // 传递 duplex
+        pythonWorker.postMessage({ f: 'setValue', args: ['duplex', duplexCheckbox.checked] });
+        println(`☑双面打印设置为 ${duplexCheckbox.checked}`);
+
+        pythonWorker.postMessage({ f: 'processFile', args: fileInput.files[0] });
+    }
+
+    // 设置对话框处理(使用已声明变量)
+    openDialogButton.addEventListener('click', () => {
+        dialog.classList.remove('hidden');
+    });
+
+    closeDialogButton.addEventListener('click', () => {
+        dialog.classList.add('hidden');
+    });
+
+    document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape') {
+            dialog.classList.add('hidden');
+        }
+    }); // 按下ESC关闭对话框
 }
 
 // 定义worker
