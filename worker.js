@@ -8,11 +8,15 @@ onmessage = function (e) {
 // and `.wasm` files as well:
 
 async function checkJsdelivrConnectivity() {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 1000); // 1 seconds timeout
+
     try {
-        const response = await fetch('https://cdn.jsdelivr.net/pyodide/v0.25.1/full/pyodide.js', { method: 'HEAD' });
+        const response = await fetch('https://cdn.jsdelivr.net/pyodide/v0.25.1/full/pyodide.js', { method: 'HEAD', signal: controller.signal });
+        clearTimeout(timeoutId);
         return response.ok;
     } catch (error) {
-        console.log(error)
+        console.log(error);
         return false;
     }
 }
