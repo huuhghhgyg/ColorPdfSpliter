@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "color-pdf-spliter"
+version = "1.0.0"
+description = "一个用于分离PDF彩色与黑白页面的库和工具"
+readme = "README.md"
+requires-python = ">=3.8"
+license = { file = "LICENSE" }
+authors = [
+  { name = "huuhghhgyg" },
+]
+dependencies = [
+    "PyMuPDF",
+    "numpy",
+]
+
+[project.scripts]
+color-pdf-spliter = "cli:main"

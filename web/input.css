@@ -1,0 +1,37 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* div {
+  @apply border border-gray-400;
+} */
+
+h3 {
+  @apply font-bold font-serif text-brown-accent;
+}
+
+progress[value]::-webkit-progress-bar {
+  @apply bg-white rounded-full h-2;
+}
+
+progress[value]::-webkit-progress-value {
+  @apply bg-brown-accent rounded-full h-2;
+}
+
+#download a {
+  @apply text-dark underline font-serif;
+}
+
+.error {
+  @apply text-gray-500;
+}
+
+.max-h-auto {
+  max-height: unset;
+}
+
+@layer utilities {
+  .dim {
+    @apply transform scale-90 filter brightness-75 rounded-xl;
+  }
+}
