@@ -2,120 +2,59 @@
 
 [English](README_EN.md) | 中文
 
-一个用于分离PDF文件中彩色页面和黑白页面的工具库及配套应用，帮您在打印时节省成本 💴。
+将输入的PDF文件分为彩色和黑白两部分，彩色打印页数多时省钱💴
 
-项目包含一个核心处理库、一个命令行工具和一个可以直接在浏览器中运行的Web界面。
+(我校打印店黑白打印0.2元/张，彩色打印1元/张。彩色打印课程作业或者什么其他的文件的时候能省很多钱。这个程序有巨大的实用价值🤑)
 
-[![在线版](https://img.shields.io/badge/在线版-colorpdfspliter.pages.dev-blue.svg)](https://colorpdfspliter.pages.dev/)
+[![.github/workflows/deploy.yml](https://github.com/huuhghhgyg/ColorPdfSpliter/actions/workflows/deploy.yml/badge.svg?branch=web)](https://colorpdfspliter.pages.dev/)
 
-> 💡 **在线版提示**：为方便临时使用。若需处理大文件或批量处理，强烈建议使用性能更佳的本地命令行版本。
+临时使用可以尝试[在线版 ColorPdfSpliter](https://colorpdfspliter.pages.dev)，在线版多次处理文件时会占用大量内存，建议使用本地版本。
 
----
-
-## 特性
-
-- **核心库**：提供纯粹的PDF处理能力，方便集成到其他Python项目中。
-- **命令行工具**：功能强大，支持单文件、多文件批量处理及双面打印模式。
-- **Web界面**：无需安装Python，在浏览器中即可完成操作，所有处理均在本地进行，保障您的文件隐私安全。
-
----
+> 如果你也觉得这是个好东西就给颗⭐呗？
 
 ## 使用方法
+### Windows
+1. 下载本[repo](https://github.com/huuhghhgyg/ColorPdfSpliter/archive/refs/heads/main.zip)，或按照右上角绿色按钮的提示`clone`本仓库。
+2. 保证你的电脑上安装了Python3，运行`initialize.bat`安装所需依赖包。如果你的电脑上没有安装Python3，请到[Python官网](https://www.python.org/downloads/)下载安装。
+3. **运行：** 安装完成后，将需要分割的PDF文件放入当前目录中，运行`run.bat`后就会对当前目录下的所有PDF文件进行分割。
+   * 如果只有一个文件，分割得到的文件会直接放在当前目录下。
+   * 如果放入了多个文件，分割得到的文件会放在`./export`文件夹中。这是一个默认路径，你可以通过在源文件中修改`ExportDir`参数来修改导出路径。
 
-### 方式一：本地命令行工具 (推荐批量处理)
+### Linux
+Linux用户应该比较少吧，直接用命令行也很方便😋
 
-**1. 下载项目**
+1. 克隆这个仓库
+    ```sh
+    git clone https://github.com/huuhghhgyg/ColorPdfSpliter.git
+    ```
 
-```bash
-git clone [https://github.com/huuhghhgyg/ColorPdfSpliter.git](https://github.com/huuhghhgyg/ColorPdfSpliter.git)
-cd ColorPdfSpliter
+2. 安装依赖包
+    ```sh
+    pip install PyMuPDF==1.24.14 numpy
+    ```
+
+3. **运行：** 和Windows的操作方法一样，将所有需要处理的PDF文件丢进当前目录中，执行
+   ```sh
+   python ColorPdfSpliter.py
+   ```
+
+   或者你也可以利用文件中的shebang直接运行这个程序:
+   ```sh
+   ./ColorPdfSpliter.py 2>/dev/null
+   ```
+   
+   即可开始分割文件
+
+## 高级用法
+`RGBDiff`参数用于控制彩色和灰色（黑白看作特殊的灰色）的阈值，如果你的分隔出来的黑白文件有色彩页面，可以适当调高这个参数，降低灰色的判定标准。
+
+可使用`duplex`参数实现双面打印时的彩色与黑白分割。这个参数保证生成的彩色与黑白文件均为连续的两页（即一张纸上的双面）。当一张纸上正反打印的两个页面中有一个为彩色，则这两个页面都会被划分入彩色文件。
+
+对于Windows用户，运行`run-duplex.bat`。
+
+对于Linux用户，使用：
+```sh
+   python ColorPdfSpliter.py duplex
 ```
-
-**2. 安装依赖 (首次使用)**
-
-运行初始化脚本，它将使用`pip`安装所有必要的依赖。请确保在项目的**根目录**下运行此命令。
-
-```bash
-# Windows
-initialize.bat
-
-# Linux / macOS
-pip install .
-```
-> `pip install .` 会将本项目作为一个库安装到您的Python环境中，这样命令行脚本才能找到核心库。
-
-**3. 运行**
-
-将您需要处理的PDF文件放入项目根目录。
-
-- **处理单面模式：**
-  ```bash
-  # Windows
-  run.bat
-  # Linux / macOS
-  python cli.py
-  ```
-
-- **处理双面模式：**
-  ```bash
-  # Windows
-  run-duplex.bat
-  # Linux / macOS
-  python cli.py duplex
-  ```
-
-- **输出规则：**
-  - 若处理单个文件，结果将保存在根目录。
-  - 若处理多个文件，结果将保存在新建的 `./export` 文件夹中。
-
-
-### 方式二：本地Web界面 (推荐预览和临时使用)
-
-由于现代浏览器的安全策略，您不能直接通过 `file://` 路径打开 `index.html`。您需要启动一个本地服务器来运行它。
-
-**1. 启动本地服务器**
-
-打开您的命令行工具 (Terminal 或 CMD)，使用 `cd` 命令进入到本项目的 `web` 文件夹内。然后运行以下命令：
-
-```bash
-# 首先，确保你在 web 文件夹里
-cd web
-
-# 然后，启动Python内置的HTTP服务器
-python -m http.server
-```
-看到 `Serving HTTP on ... port 8000` 的提示后，请不要关闭这个命令行窗口。
-
-**2. 在浏览器中访问**
-
-打开您的浏览器（如 Chrome, Safari），在地址栏输入以下地址并访问：
-
-```
-http://localhost:8000
-```
-
-现在，您就可以在网页上上传并处理您的PDF文件了。
-
----
-
-## 作为库使用
-
-您可以将 `src` 目录复制到您的项目中，然后像这样导入和使用核心处理函数：
-
-```python
-from src.color_pdf_spliter.processor import split_pdf_by_color
-
-with open("my_document.pdf", "rb") as f:
-    pdf_bytes = f.read()
-
-# 调用函数
-# results 是一个字典，包含分离后的文件名和字节流
-results = split_pdf_by_color(pdf_bytes, is_duplex=True)
-
-# 保存彩色文件
-if 'color' in results:
-    with open("my_document_color.pdf", "wb") as f:
-        f.write(results['color']['bytes'])
-```
-
-> 如果您觉得这个项目对您有帮助，请给一颗⭐吧！
+## 特别鸣谢
+* New Bing：告诉我如何使用PyMuPDF来处理PDF文件

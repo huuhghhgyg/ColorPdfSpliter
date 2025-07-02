@@ -1,12 +1,9 @@
 #!/usr/bin/python
 
 # 导入需要的模块
-import os
-import sys
-
-import pymupdf  # 用于处理pdf文件
-import numpy as np  # 用于处理数组
-import glob  # 用于获取当前目录文件
+import os  # pyodide需要，否则处理完成会报错
+import pymupdf
+import numpy as np
 
 # 参数设置
 RGBDiff = 30  # RGB颜色总差异之和
@@ -34,17 +31,24 @@ def isColorPage(page):
 
 
 LEN_TITLE = 30  # title长度
+TEXT_TITLE = "Complete"  # cli处理的title文本显示
 
 
-def progress_bar(value, total=100, title="Complete"):
+def progress_display_cli(value, total=100, title=TEXT_TITLE):
     percent = (value / total) * 100
     bar = "█" * int(percent // 2) + "-" * (50 - int(percent // 2))
     if len(title) > LEN_TITLE:
         title = title[:LEN_TITLE] + "..."
     print(f"\r|{bar}| {value}/{total} {title}", end="\r" if value < total else "\n")
+    
 
+def progress_display_web(value, total):
+    logProgress(value, total)
+    
+def logProgress(current, total):
+    print("检测页面：", current, "/", total)
 
-def splitPDF(file, exportdir="", duplex = False):
+def splitPDF(file, fn_progress, exportdir="", duplex = False):
     # 文件名设置
     filename = {
         "input": file,
@@ -81,12 +85,12 @@ def splitPDF(file, exportdir="", duplex = False):
                 count["gray"] = count["gray"] + 2
             count["page"] = count["page"] + 2
             # print("检测页面：", count['page'],'/',len(doc))
-            progress_bar(count["page"], len(doc), doc.name)
+            fn_progress(count["page"], len(doc), doc.name)
     else:
         for page in doc:
             count["page"] = count["page"] + 1
             # print("检测页面：", count['page'],'/',len(doc))
-            progress_bar(count["page"], len(doc), doc.name)
+            fn_progress(count["page"], len(doc), doc.name)
 
             # 判断页面是否为彩色页面
             if isColorPage(page):
@@ -113,34 +117,4 @@ def splitPDF(file, exportdir="", duplex = False):
     else:
         print("文件", filename["input"], "分割后不存在彩色页面，不保存文件")
 
-
-# 总流程
-if __name__ == "__main__":
-    pdf_list = glob.glob("*.pdf")
-
-    if len(pdf_list) == 0:  # 没有pdf文件
-        print("未检测到当前目录中存在pdf文件")
-        os.system("pause")
-        exit()
-    
-    #判断是否双面打印
-    if sys.argv[-1]=="duplex":
-        if_duplex = True
-    else:
-        if_duplex = False
-
-    if len(pdf_list) > 1:
-        # 判断批量输出目录是否存在
-        if not os.path.exists(ExportDir):
-            os.mkdir(ExportDir)
-
-        for i in range(len(pdf_list)):
-            print(f"[{i + 1}/{len(pdf_list)}] 正在处理: {pdf_list[i]}")
-            splitPDF(pdf_list[i], "./export/", duplex = if_duplex)
-            print("\n")
-
-        print("多项文件已保存至", ExportDir)
-    elif len(pdf_list) == 1:
-        splitPDF(pdf_list[0], duplex = if_duplex)
-
-    print("已完成")
+# 总流程：本地运行版用cli.py，web版直接调用函数处理

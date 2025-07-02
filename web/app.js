@@ -107,7 +107,7 @@ function initComponents() {
         pythonWorker.postMessage({ f: 'setValue', args: ['RGBDiff', parseInt(rgbDiffText.value)] });
         println(`☑RGBDiff 参数设置为 ${rgbDiffText.value}`);
         // 传递 duplex
-        pythonWorker.postMessage({ f: 'setValue', args: ['duplex', duplexCheckbox.checked] });
+        pythonWorker.postMessage({ f: 'setValue', args: ['if_duplex', duplexCheckbox.checked] });
         println(`☑双面打印设置为 ${duplexCheckbox.checked}`);
 
         pythonWorker.postMessage({ f: 'processFile', args: fileInput.files[0] });

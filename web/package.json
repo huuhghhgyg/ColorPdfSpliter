@@ -1,4 +1,9 @@
 {
+  "scripts": {
+    "dev": "./jit.ps1",
+    "preview": "bash ./preview.sh",
+    "build": "cp ../ColorPdfSpliter.py ."
+  },
   "devDependencies": {
     "tailwindcss-cli": "^0.1.2"
   }
