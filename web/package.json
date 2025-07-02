@@ -2,6 +2,7 @@
   "scripts": {
     "dev": "npx tailwindcss -i ./input.css -o ./style.css --watch",
     "preview": "bash ./preview.sh",
+    "preview:win": "powershell -Command \"Copy-Item ../ColorPdfSpliter.py .; python -m http.server 4000; Remove-Item ./ColorPdfSpliter.py\"",
     "build": "bash ./compile.sh"
   },
   "devDependencies": {

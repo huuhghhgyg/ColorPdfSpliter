@@ -1,4 +1,22 @@
+#!/usr/bin/python
 from ColorPdfSpliter import *
+
+# 参数设置（仅本地命令行运行生效）
+ExportDir = "./export"
+RGBDiff = 30  # RGB颜色总差异之和
+
+LEN_TITLE = 30  # title长度
+TEXT_TITLE = "Complete"  # cli处理的title文本显示
+
+
+# 进度条显示函数（cli）
+def progress_display_cli(value, total=100, title=TEXT_TITLE):
+    percent = (value / total) * 100
+    bar = "█" * int(percent // 2) + "-" * (50 - int(percent // 2))
+    if len(title) > LEN_TITLE:
+        title = title[:LEN_TITLE] + "..."
+    print(f"\r|{bar}| {value}/{total} {title}", end="\r" if value < total else "\n")
+
 
 # cli总流程
 if __name__ == "__main__":
