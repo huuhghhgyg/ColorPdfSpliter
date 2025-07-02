@@ -18,7 +18,7 @@ jobs:
 
       # Compile css using npx
       - name: Compile CSS
-        run: bash ./compile.ps1
+        run: cd web && bash ./compile.sh
 
       - name: Publish to Cloudflare Pages
         uses: cloudflare/pages-action@v1
