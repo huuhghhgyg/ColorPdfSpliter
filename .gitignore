@@ -2,3 +2,5 @@ style.css
 node_modules/
 .DS_Store
 *.pdf
+*/__pycache__/*
+web/ColorPdfSpliter.py

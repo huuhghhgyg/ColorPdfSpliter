@@ -1,8 +1,8 @@
 {
   "scripts": {
-    "dev": "./jit.ps1",
+    "dev": "npx tailwindcss -i ./input.css -o ./style.css --watch",
     "preview": "bash ./preview.sh",
-    "build": "cp ../ColorPdfSpliter.py ."
+    "build": "bash ./compile.sh"
   },
   "devDependencies": {
     "tailwindcss-cli": "^0.1.2"

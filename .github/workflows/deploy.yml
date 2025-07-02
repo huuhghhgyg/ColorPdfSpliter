@@ -1,7 +1,7 @@
 on:
   push:
     branches: 
-      - web
+      - main
 
 jobs:
   publish:
@@ -14,7 +14,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
         with:
-          ref: 'web'
+          ref: 'main'
 
       # Compile css using npx
       - name: Compile CSS
@@ -29,4 +29,4 @@ jobs:
           directory: .
           # Optional: Switch what branch you are publishing to.
           # By default this will be the branch which triggered this workflow
-          branch: web
+          branch: main
