@@ -1,2 +1,2 @@
-python ColorPdfSpliter.py
+python cli.py
 pause

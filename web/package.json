@@ -1,0 +1,10 @@
+{
+  "scripts": {
+    "dev": "npx tailwindcss -i ./input.css -o ./style.css --watch",
+    "preview": "bash ./preview.sh",
+    "build": "bash ./compile.sh"
+  },
+  "devDependencies": {
+    "tailwindcss-cli": "^0.1.2"
+  }
+}

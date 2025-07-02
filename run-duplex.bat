@@ -1,2 +1,2 @@
-python ColorPdfSpliter.py duplex
+python cli.py duplex
 pause
