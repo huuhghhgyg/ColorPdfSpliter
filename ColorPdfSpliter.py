@@ -68,12 +68,12 @@ def splitPDF(file, fn_progress, exportdir="", duplex = False):
     #双面打印
     if duplex:
         for idx in range(0, len(doc), 2):
-            if idx == len(doc)-1:
-                front_page = doc[idx]
+            front_page = doc[idx]
+            if idx == len(doc) - 1:
                 back_page = doc[idx]
             else:
-                front_page = doc[idx]
-                back_page = doc[idx+1]
+                back_page = doc[idx + 1]
+                
             # 判断正反两面是否有彩色页面
             if isColorPage(front_page) or isColorPage(back_page):
                 # 如果有，将正反两页添加到彩色pdf文件中
@@ -85,12 +85,11 @@ def splitPDF(file, fn_progress, exportdir="", duplex = False):
                 count["gray"] = count["gray"] + 2
             count["page"] = count["page"] + 2
             # print("检测页面：", count['page'],'/',len(doc))
-            fn_progress(count["page"], len(doc), doc.name)
+            fn_progress(min(count["page"], len(doc)), len(doc), doc.name)
     else:
         for page in doc:
             count["page"] = count["page"] + 1
             # print("检测页面：", count['page'],'/',len(doc))
-            fn_progress(count["page"], len(doc), doc.name)
 
             # 判断页面是否为彩色页面
             if isColorPage(page):
@@ -101,6 +100,8 @@ def splitPDF(file, fn_progress, exportdir="", duplex = False):
                 # 如果不是，将页面添加到非彩色pdf文件中
                 gray_doc.insert_pdf(doc, from_page=page.number, to_page=page.number)
                 count["gray"] = count["gray"] + 1
+            
+            fn_progress(count["page"], len(doc), doc.name)
 
     # 保存两个pdf文件
     # 保存灰色页面
