@@ -56,7 +56,7 @@ For Windows users, run `run-duplex.bat`.
 
 For Linux users, use:
 ```sh
-python ColorPdfSpliter.py duplex
+python cli.py duplex
 ```
 
 For the online version, enable the "Double-sided printing" option in "Settings".

@@ -58,7 +58,7 @@ Linux用户应该比较少吧，直接用命令行也很方便😋
 
 对于Linux用户，使用：
 ```sh
-python ColorPdfSpliter.py duplex
+python cli.py duplex
 ```
 
 对于在线版，在“设置”中启用“双面打印”选项。
