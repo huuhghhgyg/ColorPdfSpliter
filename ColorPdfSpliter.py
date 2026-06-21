@@ -111,4 +111,76 @@ def splitPDF(file, fn_progress, exportdir="", duplex=False):
         print("文件", filename["input"], "分割后不存在彩色页面，不保存文件")
 
 
+def splitPDFSegmented(file, fn_progress, exportdir="", duplex=False):
+    """
+    按颜色连续段落分割PDF，生成多个编号文件以保持原始顺序。
+
+    例如：页码 [B,B,C,C,B,C,B,B] 会生成：
+      01_黑白.pdf (第1-2页)
+      02_彩色.pdf (第3-4页)
+      03_黑白.pdf (第5页)
+      04_彩色.pdf (第6页)
+      05_黑白.pdf (第7-8页)
+    按编号顺序打印即可恢复原始顺序。
+    """
+    doc = pymupdf.open(file)
+    total = len(doc)
+
+    # 第一步：判断每页/每张纸是否为彩色
+    groups = []  # [(is_color, [page_numbers]), ...]
+
+    if duplex:
+        for idx in range(0, total, 2):
+            front_page = doc[idx]
+            back_page = doc[idx + 1] if idx + 1 < total else doc[idx]
+            is_color = isColorPage(front_page) or isColorPage(back_page)
+            pages = [idx, idx + 1] if idx + 1 < total else [idx]
+            groups.append((is_color, pages))
+    else:
+        for page in doc:
+            groups.append((isColorPage(page), [page.number]))
+
+    if not groups:
+        doc.close()
+        return
+
+    # 第二步：合并连续同色页面为段落
+    segments = []
+    cur_color = groups[0][0]
+    cur_pages = []
+
+    for is_color, pages in groups:
+        if is_color == cur_color:
+            cur_pages.extend(pages)
+        else:
+            segments.append((cur_color, cur_pages[:]))
+            cur_color = is_color
+            cur_pages = pages[:]
+
+    segments.append((cur_color, cur_pages[:]))
+
+    # 第三步：保存每个段落
+    print(f"文件 {file} 颜色段落数：{len(segments)}")
+    for i, (is_color, pages) in enumerate(segments, 1):
+        seg_name = "彩色" if is_color else "黑白"
+        outfile = f"{file[:-4]}_{i:02d}_{seg_name}.pdf"
+
+        out_doc = pymupdf.open()
+        out_doc.insert_pdf(doc, from_page=pages[0], to_page=pages[-1])
+
+        if is_color:
+            print(f"  保存彩色段落 #{i}: 第 {pages[0] + 1}-{pages[-1] + 1} 页 → {outfile}")
+        else:
+            print(f"  保存黑白段落 #{i}: 第 {pages[0] + 1}-{pages[-1] + 1} 页 → {outfile}")
+
+        out_doc.save(exportdir + outfile)
+        out_doc.close()
+        fn_progress(i, len(segments), doc.name)
+
+    total_color = sum(1 for is_c, _ in segments if is_c)
+    total_bw = len(segments) - total_color
+    print(f"✅ 文件 {file} 分割完成：共 {len(segments)} 段（彩色 {total_color} 段，黑白 {total_bw} 段）")
+    doc.close()
+
+
 # 总流程：本地运行版用cli.py，web版直接调用函数处理

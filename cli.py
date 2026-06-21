@@ -31,8 +31,13 @@ if __name__ == "__main__":
         os.system("pause")
         exit()
 
-    # 判断是否双面打印
-    if_duplex = sys.argv[-1] == "duplex"
+    # 判断模式
+    if_duplex = "duplex" in sys.argv
+    if_segmented = "segmented" in sys.argv
+
+    split_func = splitPDFSegmented if if_segmented else splitPDF
+    mode_name = "分段" if if_segmented else "标准"
+    print(f"模式: {mode_name}分割 | 双面打印: {'开' if if_duplex else '关'}")
 
     if len(pdf_list) > 1:
         # 判断批量输出目录是否存在
@@ -41,11 +46,11 @@ if __name__ == "__main__":
 
         for i in range(len(pdf_list)):
             print(f"[{i + 1}/{len(pdf_list)}] 正在处理: {pdf_list[i]}")
-            splitPDF(pdf_list[i], progress_display_cli, "./export/", duplex=if_duplex)
+            split_func(pdf_list[i], progress_display_cli, "./export/", duplex=if_duplex)
             print("\n")
 
         print("多项文件已保存至", ExportDir)
     elif len(pdf_list) == 1:
-        splitPDF(pdf_list[0], progress_display_cli, duplex=if_duplex)
+        split_func(pdf_list[0], progress_display_cli, duplex=if_duplex)
 
     print("已完成")

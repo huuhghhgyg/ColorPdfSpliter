@@ -1,4 +1,4 @@
 #!/bin/bash
+# Copy the core Python script into the web directory for Pyodide
 cp ../ColorPdfSpliter.py .
-npm ci
-npx tailwindcss -i ./input.css -o ./style.css --minify
+echo "ColorPdfSpliter.py copied. Build complete."
