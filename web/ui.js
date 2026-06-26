@@ -9,16 +9,26 @@ function isMdViewport() {
 function initOutputSwitch() {
     const switcher = document.getElementById('switchOutputBtn');
     const outputElement = document.getElementById('output');
-    const consoleElement = document.getElementById('console');
+    const outputTitleElement = document.getElementById('output-title');
     const homeElement = document.getElementById('home');
     let isOutputOpen = false;
+    let resizeFrame = 0;
 
     const updateOutputPosition = () => {
-        outputElement.style.bottom = isOutputOpen ? '0' : `-${consoleElement.clientHeight}px`;
+        const titleHeight = Math.max(outputTitleElement.clientHeight, 36);
+        const outputHeight = Math.max(outputElement.clientHeight, titleHeight);
+        const hiddenHeight = Math.max(outputHeight - titleHeight, 0);
+
+        outputElement.style.bottom = isOutputOpen ? '0' : `-${hiddenHeight}px`;
+        document.documentElement.style.setProperty('--output-height', `${outputHeight}px`);
+        document.documentElement.style.setProperty(
+            '--output-space',
+            `${isOutputOpen ? outputHeight : titleHeight}px`
+        );
     };
 
     const switchOutput = (nextState) => {
-        isOutputOpen = isMdViewport() ? true : nextState;
+        isOutputOpen = nextState;
 
         if (isMdViewport()) {
             homeElement.classList.remove('dim');
@@ -27,18 +37,19 @@ function initOutputSwitch() {
         }
 
         updateOutputPosition();
-        switcher.textContent = isOutputOpen ? '🔼 收起' : '🔽 展开';
+        switcher.textContent = isOutputOpen ? '🔽 收起' : '🔼 展开';
     };
 
     window.switchOutput = switchOutput;
 
-    switcher.addEventListener('click', () => {
+    switcher.onclick = () => {
         switchOutput(!isOutputOpen);
-    });
+    };
 
-    switchOutput(true);
+    switchOutput(isMdViewport());
 
     window.addEventListener('resize', () => {
-        switchOutput(isOutputOpen);
+        cancelAnimationFrame(resizeFrame);
+        resizeFrame = requestAnimationFrame(() => switchOutput(isOutputOpen));
     });
 }

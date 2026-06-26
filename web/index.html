@@ -12,97 +12,118 @@
     href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text x=%2250%%22 y=%2250%%22 style=%22dominant-baseline:central;text-anchor:middle;font-size:90px;%22>📁</text></svg>" />
 </head>
 
-<body class="bg-dark overflow-hidden">
+<body class="bg-dark">
   <!-- home在md尺寸下，当output打开时有dim -->
-  <div id="home" class="bg-brown-container text-dark flex justify-center
-    rounded-none transition-all duration-500">
+  <div id="home" class="bg-paper-500 text-dark flex justify-center min-h-screen overflow-y-auto
+    rounded-none transition-all duration-300 ease-out">
     <!-- Content layout -->
-    <div class="flex-auto flex flex-col md:grid md:grid-cols-2 md:grid-rows-3 md:gap-x-4 md:p-8 
-    lg:gap-x-8 p-4 lg:p-12 h-screen max-w-screen-2xl">
-      <!-- 标题 -->
-      <div class="md:col-span-2 lg:col-span-1 md:flex md:flex-col justify-end md:mb-8">
+    <div class="app-layout">
+      <section class="control-panel">
         <div id="title" class="mt-8 md:mt-0 md:flex md:items-end lg:flex-col lg:items-start">
-          <h1 class="text-4xl lg:text-5xl tracking-wide font-serif hover:underline">
+          <h1 class="text-4xl lg:text-5xl font-serif hover:underline">
             <a href="https://github.com/huuhghhgyg/ColorPdfSpliter" target="_blank">Color Pdf Spliter</a>
           </h1>
           <h2 class="text-xl lg:text-2xl font-serif md:ml-2 lg:ml-0 lg:mt-2 text-gray-600">with Pyodide</h2>
         </div>
         <p class="font-serif mt-2 lg:mt-4">将PDF的彩色页面与黑白页面分离📄</p>
-      </div>
 
-      <!-- 控件和下载 -->
-      <div class="mt-4 flex flex-col md:mt-0 md:row-span-2 md:row-start-2">
-        <!-- 控件 -->
-        <div class="">
-          <div id="uploads" class="max-w-1/3">
-            <h3>打开PDF文件</h3>
-            <input type="file" id="file-input" accept=".pdf" disabled="disabled" />
+        <div id="uploads" class="mt-8">
+          <h3>打开 PDF 文件</h3>
+          <label id="drop-zone" class="drop-zone is-disabled" for="file-input">
+            <input class="visually-hidden" type="file" id="file-input" accept=".pdf" disabled="disabled" />
+            <span class="upload-mark" aria-hidden="true">PDF</span>
+            <span class="upload-copy">
+              <strong>拖入文件，或点击选择</strong>
+              <small id="upload-hint">Pyodide 准备完成后即可开始</small>
+            </span>
+          </label>
+        </div>
+
+        <div class="settings-card">
+          <button id="settingsToggle" class="settings-toggle" type="button" aria-expanded="false"
+            aria-controls="settings-panel">
+            <span>参数设置</span>
+            <span id="settingsState" class="settings-state" aria-hidden="true">🔼 展开</span>
+          </button>
+          <div id="settings-panel" class="settings-panel is-closed">
+            <label for="rgb-diff">RGBDiff</label>
+            <input type="number" id="rgb-diff" required placeholder="30">
+            <label class="duplex-option" for="duplex-checkbox">
+              <input type="checkbox" id="duplex-checkbox">
+              <span>双面打印</span>
+            </label>
           </div>
+        </div>
 
-          <div id="progress" class="mt-2 lg:mt-4">
-            <div>
-              <h3 class="inline-block">处理进度</h3>
-              <span id="progress-text" class="ml-2 inline-block text-gray-600 font-mono"></span>
+        <p class="font-serif text-sm text-gray-600 mt-3">💡提示：Web版内存占用较高，长期大批量处理建议使用Python版本</p>
+
+      </section>
+
+      <section id="file-stage" class="file-stage classify-panel is-empty" aria-live="polite">
+        <div id="sort-stage" class="sort-stage">
+          <article id="source-card" class="file-card source-file">
+            <p class="file-eyebrow">上传的文件</p>
+            <div class="file-figure">
+              <div id="source-pages" class="page-stack source-pages"></div>
+              <div id="progress" class="file-progress">
+                <progress id="progress-bar" value="0" max="100"></progress>
+                <span id="progress-text" class="hidden"></span>
+              </div>
+              <p id="source-file-status" class="file-status">等待处理</p>
             </div>
-            <progress id="progress-bar" class="" value="0" max="100"></progress>
+            <div class="file-caption">
+              <strong id="source-file-name">未选择文件</strong>
+              <span id="source-file-size"></span>
+            </div>
+          </article>
+
+          <div class="sort-arrow" aria-hidden="true">→</div>
+
+          <div class="result-column">
+            <article id="gray-card" class="file-card result-card is-waiting">
+              <p class="file-eyebrow">黑白部分</p>
+              <div class="file-figure">
+                <div id="gray-pages" class="page-stack result-pages"></div>
+                <p class="file-status"><span id="gray-page-count">0</span> 页</p>
+              </div>
+              <a id="gray-download-title" class="download-title" aria-disabled="true">黑白页面</a>
+            </article>
+
+            <article id="color-card" class="file-card result-card is-waiting">
+              <p class="file-eyebrow">彩色部分</p>
+              <div class="file-figure">
+                <div id="color-pages" class="page-stack result-pages"></div>
+                <p class="file-status"><span id="color-page-count">0</span> 页</p>
+              </div>
+              <a id="color-download-title" class="download-title" aria-disabled="true">彩色页面</a>
+            </article>
           </div>
-          <p class="font-serif">💡提示：Web版内存占用较高，长期大批量处理建议使用Python版本</p>
         </div>
 
-        <!-- 下载 -->
-        <div id="container-download" class="flex-auto mt-2 lg:mt-4 hidden flex flex-col overflow-hidden">
-          <h3>下载链接</h3>
-          <div id="download" class="flex-auto overflow-y-auto max-h-48 md:max-h-full">
-          </div>
-        </div>
+      </section>
+
+      <div id="container-download" class="history-panel hidden">
+        <h3>已分类文件</h3>
+        <div id="download" class="history-list"></div>
       </div>
 
     </div>
   </div>
 
   <!-- 输出 -->
-  <div id="output" class="absolute h-4/5 w-full left-0 -bottom-full transition-[bottom] duration-300 rounded-t-md
-    md:bottom-0 md:h-2/3 md:w-1/2 md:pr-8 md:pl-2 md:left-1/2 md:max-w-screen-md
-    lg:pl-0 lg:pr-12 lg:h-3/4
+  <div id="output" class="fixed z-50 h-4/5 w-full left-0 -bottom-full transition-[bottom] duration-300 ease-out rounded-t-md
+    md:bottom-0 md:h-56 md:w-full md:left-0 md:max-w-none
     flex flex-col flex-auto overflow-hidden">
     <div id="output-title" class="flex p-4 text-sm font-semibold md:py-2 bg-gray-900 text-gray-200 rounded-t-xl md:rounded-t-md">
       <span class="flex-1">📋 输出
       </span>
-      <button id="openDialogBtn">⚙ 设置</button>
-      <button id="switchOutputBtn" class="ml-4 md:ml-2 md:hidden">🔼🔽 显示</button>
+      <button id="switchOutputBtn" class="ml-4 md:ml-2">🔼🔽 显示</button>
     </div>
     <div id="console" class="flex-auto overflow-auto p-2 lg:p-4 bg-gray-800 text-gray-300">
       ⏳正在准备 Pyodide 和相关依赖...
     </div>
   </div>
 
-  <!-- Dialog -->
-  <div id="dialog" class="fixed hidden inset-0 flex items-center justify-center bg-gray-800 bg-opacity-75">
-    <div class="bg-white rounded-lg shadow-lg w-3/4 md:w-1/2 relative">
-      <div class="px-6 py-4 border-b border-gray-300 flex">
-        <h2 class="flex-1 text-lg font-semibold text-dark">设置</h2>
-        <!-- × -->
-        <button id="closeDialogBtn" class="text-gray-500 hover:text-gray-700 focus:outline-none">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </button>
-      </div>
-      <div class="p-6">
-        <label for="variance" class="block mb-2 text-sm font-medium text-dark">RGBDiff（颜色差值）</label>
-        <input type="number" id="rgb-diff" required
-          class="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-brown-container"
-          placeholder="30">
-        <!-- 添加双面打印选项 -->
-        <div class="mt-4">
-          <label for="duplex-checkbox" class="inline-flex items-center">
-            <input type="checkbox" id="duplex-checkbox" class="form-checkbox h-4 w-4 text-brown-container">
-            <span class="ml-2 text-sm font-medium text-dark">双面打印</span>
-          </label>
-        </div>
-      </div>
-    </div>
-  </div>
 </body>
 
 </html>

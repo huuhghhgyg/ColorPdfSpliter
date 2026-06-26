@@ -10,7 +10,7 @@ TEXT_TITLE = "Complete"  # cli处理的title文本显示
 
 
 # 进度条显示函数（cli）
-def progress_display_cli(value, total=100, title=TEXT_TITLE):
+def progress_display_cli(value, total=100, title=TEXT_TITLE, page_type=""):
     percent = (value / total) * 100
     bar = "█" * int(percent // 2) + "-" * (50 - int(percent // 2))
     if len(title) > LEN_TITLE:

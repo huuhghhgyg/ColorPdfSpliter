@@ -131,6 +131,7 @@ async function generateLink(path, filename) {
 
     if (!fileExists) {
         println(`没有 ${filename}`);
+        postMessage({ f: 'markFileMissing', args: filename });
         return;
     }
 
@@ -156,8 +157,8 @@ async function processFile(file) {
     pyodide.FS.writeFile(file.name, fileBuffer);
 
     println('正在处理文件,请稍等...');
-    pyodide.globals.set('progress_display_web', (current, total) => {
-        postMessage({ f: 'setProgress', args: [current, total] });
+    pyodide.globals.set('progress_display_web', (current, total, title, pageType) => {
+        postMessage({ f: 'setProgress', args: [current, total, pageType ?? title] });
     });
 
     try {

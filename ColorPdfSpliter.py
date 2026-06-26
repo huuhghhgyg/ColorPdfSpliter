@@ -32,8 +32,8 @@ def isColorPage(page):
 # progress_display_cli在cli.py中定义
 
 
-def progress_display_web(value, total):
-    print("检测页面：", current, "/", total)
+def progress_display_web(value, total, title="", page_type=""):
+    print("检测页面：", value, "/", total)
 
 
 def splitPDF(file, fn_progress, exportdir="", duplex=False):
@@ -64,12 +64,14 @@ def splitPDF(file, fn_progress, exportdir="", duplex=False):
 
             # 判断正反两面是否有彩色页面
             if isColorPage(front_page) or isColorPage(back_page):
+                page_type = "color"
                 # 如果有，将正反两页添加到彩色pdf文件中
                 color_doc.insert_pdf(
                     doc, from_page=front_page.number, to_page=back_page.number
                 )
                 count["color"] = count["color"] + 2
             else:
+                page_type = "gray"
                 # 如果没有，将正反两页添加到非彩色pdf文件中
                 gray_doc.insert_pdf(
                     doc, from_page=front_page.number, to_page=back_page.number
@@ -77,7 +79,7 @@ def splitPDF(file, fn_progress, exportdir="", duplex=False):
                 count["gray"] = count["gray"] + 2
             count["page"] = count["page"] + 2
             # print("检测页面：", count['page'],'/',len(doc))
-            fn_progress(min(count["page"], len(doc)), len(doc), doc.name)
+            fn_progress(min(count["page"], len(doc)), len(doc), doc.name, page_type)
     else:
         for page in doc:
             count["page"] = count["page"] + 1
@@ -85,15 +87,17 @@ def splitPDF(file, fn_progress, exportdir="", duplex=False):
 
             # 判断页面是否为彩色页面
             if isColorPage(page):
+                page_type = "color"
                 # 如果是，将页面添加到彩色pdf文件中
                 color_doc.insert_pdf(doc, from_page=page.number, to_page=page.number)
                 count["color"] = count["color"] + 1
             else:
+                page_type = "gray"
                 # 如果不是，将页面添加到非彩色pdf文件中
                 gray_doc.insert_pdf(doc, from_page=page.number, to_page=page.number)
                 count["gray"] = count["gray"] + 1
 
-            fn_progress(count["page"], len(doc), doc.name)
+            fn_progress(count["page"], len(doc), doc.name, page_type)
 
     # 保存两个pdf文件
     # 保存灰色页面
