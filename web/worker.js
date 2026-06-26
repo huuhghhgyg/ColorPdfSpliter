@@ -1,163 +1,195 @@
-// Worker 线程
-onmessage = function (e) {
-    self[e.data.f](e.data.args);
-}
+const PYODIDE_CDN_URL = 'https://cdn.jsdelivr.net/pyodide/v0.25.1/full/pyodide.js';
+const PYODIDE_MIRROR_URL = 'https://proxy.zhhuu.top/cdn/pyodide/v0.25.1/full/pyodide.js';
+const PYMUPDF_WHEEL = 'PyMuPDF-1.24.8-cp311-none-emscripten_3_1_32_wasm32.whl';
 
-// Setup your project to serve `py-worker.js`. You should also serve
-// `pyodide.js`, and all its associated `.asm.js`, `.json`,
-// and `.wasm` files as well:
+const println = (text) => postMessage({ f: 'println', args: text });
+const printError = (text) => postMessage({ f: 'printError', args: text });
+
+let pyodideInstance;
+const pyodideReady = initPyodide().catch((error) => {
+    printError(getErrorMessage(error));
+    throw error;
+});
+
+self.addEventListener('message', (event) => {
+    const { f: action, args } = event.data ?? {};
+    const handler = messageHandlers[action];
+
+    if (typeof handler !== 'function') {
+        printError(`未知操作: ${action}`);
+        return;
+    }
+
+    Promise.resolve(handler(args)).catch((error) => {
+        printError(getErrorMessage(error));
+    });
+});
 
 async function checkJsdelivrConnectivity() {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 1000); // 1 seconds timeout
+    const timeoutId = setTimeout(() => controller.abort(), 1000);
 
     try {
-        const response = await fetch('https://cdn.jsdelivr.net/pyodide/v0.25.1/full/pyodide.js', { method: 'HEAD', signal: controller.signal });
-        clearTimeout(timeoutId);
+        const response = await fetch(PYODIDE_CDN_URL, {
+            method: 'HEAD',
+            signal: controller.signal
+        });
         return response.ok;
-    } catch (error) {
-        console.log(error);
+    } catch {
+        // ponytail: probe failure only selects the mirror, no need to spam the console.
         return false;
+    } finally {
+        clearTimeout(timeoutId);
     }
 }
 
 async function importPyodide() {
-    const jsdelivrAccessible = await checkJsdelivrConnectivity();
-    if (jsdelivrAccessible) {
-        importScripts("https://cdn.jsdelivr.net/pyodide/v0.25.1/full/pyodide.js");
-        println('🔗正在通过jsDelivr获取pyodide...')
-    } else {
-        importScripts("https://proxy.zhhuu.top/cdn/pyodide/v0.25.1/full/pyodide.js");
-        println('🔗正在通过镜像获取pyodide...')
-    }
+    const useJsdelivr = await checkJsdelivrConnectivity();
+    const scriptUrl = useJsdelivr ? PYODIDE_CDN_URL : PYODIDE_MIRROR_URL;
 
-    return
+    println(useJsdelivr ? '🔗正在通过 jsDelivr 获取 pyodide...' : '🔗正在通过镜像获取 pyodide...');
+    importScripts(scriptUrl);
 }
 
-println = (text) => postMessage({ f: 'println', args: text });
-print = (text) => postMessage({ f: 'print', args: text });
-printError = (text) => postMessage({ f: 'printError', args: text });
+function formatPackageNames(namesText) {
+    return namesText
+        .split(',')
+        .map((name) => name.trim())
+        .filter(Boolean)
+        .map((name) => {
+            if (name === 'pymupdf' || name.startsWith('PyMuPDF-')) {
+                return 'PyMuPDF';
+            }
 
-async function main() {
+            if (name === 'numpy') {
+                return 'NumPy';
+            }
+
+            return name;
+        })
+        .join('、');
+}
+
+function reportPackageProgress(message) {
+    const match = /^(Loading|Loaded)\s+(.+)$/.exec(message);
+    if (!match) {
+        return;
+    }
+
+    const [, status, namesText] = match;
+    const packageNames = formatPackageNames(namesText);
+
+    if (status === 'Loading') {
+        println(`⏳正在加载依赖：${packageNames}...`);
+        return;
+    }
+
+    println(`✅依赖加载完成：${packageNames}`);
+}
+
+async function initPyodide() {
     await importPyodide();
-    pyodide = await loadPyodide({
-        // indexURL: "https://cdn.jsdelivr.net/pyodide/v0.23.4/full/",
-        // fullStdLib: false,
-        // stdout: text => {
-        //     printMessage(text);
-        // },
-        stderr: text => {
-            postMessage(text);
+    pyodideInstance = await loadPyodide({
+        stderr: (text) => {
+            printError(text);
         }
     });
 
-    println('[1/3] 正在加载micropip...')
-    await pyodide.loadPackage("micropip");
-    const micropip = pyodide.pyimport("micropip");
-    print('✅')
-    println('[2/3] 正在加载PyMuPDF...')
-    // Build a wheel for pyodide: https://pymupdf.readthedocs.io/en/latest/pyodide.html
-    // await pyodide.loadPackage('https://ghostscript.com/~julian/pyodide/PyMuPDF-1.23.5-cp311-none-emscripten_3_1_32_wasm32.whl');
-    await pyodide.loadPackage('PyMuPDF-1.24.8-cp311-none-emscripten_3_1_32_wasm32.whl');
-    print('✅')
-    println('[3/3] 正在加载numpy...')
-    await micropip.install('numpy')
-    pyodide.runPython(`
-            import sys
-            print(sys.version)
+    await pyodideInstance.loadPackage([PYMUPDF_WHEEL, 'numpy'], {
+        messageCallback: reportPackageProgress,
+        errorCallback: printError
+    });
 
-            import fitz
-            print(fitz.version)
-            `)
-    print('✅')
-    println('库引用完成');
+    pyodideInstance.runPython(`
+        import sys
+        print(sys.version)
 
-    //读取当前目录下的script.py文件
-    // pyodide.runPython(await (await fetch("./ColorPdfSpliterWeb.py")).text());
-    pyodide.runPython(await (await fetch("./ColorPdfSpliter.py")).text());
-    println('脚本加载完成');
+        import fitz
+        print(fitz.version)
+    `);
 
-    // 显示上传按钮
-    postMessage({ f: "enableComponents" })
+    pyodideInstance.runPython(await (await fetch('./ColorPdfSpliter.py')).text());
+    println('✅脚本加载完成');
+
+    postMessage({ f: 'enableComponents' });
     println('🆗准备就绪');
-    postMessage({ f: "switchConsole", args: false })
-
-    return pyodide
+    postMessage({ f: 'switchConsole', args: false });
 }
 
-var pyodide = main();
+async function getPyodide() {
+    await pyodideReady;
+    return pyodideInstance;
+}
 
-async function generateLink(link, filename) {
-    // 检查文件是否存在
-    let fileExist = await pyodide.runPython(`os.path.exists("${link}")`)
-    if (!fileExist) {
-        println(`没有 ${filename}`)
-        return
+function getErrorMessage(error) {
+    return error instanceof Error ? error.message : String(error);
+}
+
+async function generateLink(path, filename) {
+    const pyodide = await getPyodide();
+    const fileExists = pyodide.runPython(`os.path.exists(${JSON.stringify(path)})`);
+
+    if (!fileExists) {
+        println(`没有 ${filename}`);
+        postMessage({ f: 'markFileMissing', args: filename });
+        return;
     }
 
     try {
-        // Get the file content as Uint8Array
-        const fileContent = pyodide.FS.readFile(link, { encoding: 'binary' });
-
-        // Create blob directly from Uint8Array
+        const fileContent = pyodide.FS.readFile(path, { encoding: 'binary' });
         const blob = new Blob([fileContent], { type: 'application/pdf' });
 
-        // 输出
-        postMessage({ f: "generateFileLink", args: [filename, blob] });
-    } catch (e) {
-        printError(e.message);
+        postMessage({ f: 'generateFileLink', args: [filename, blob] });
+    } catch (error) {
+        printError(getErrorMessage(error));
     }
 }
 
-
-function processFile(file) {
-    // Referred to https://github.com/pyodide/pyodide/issues/679
-    var reader = new FileReader();
-    reader.readAsBinaryString(file);
-    reader.onload = async function (evt) {
-        println('正在读取文件')
-        content = evt.target.result;
-        var output = pyodide.runPython('from js import content\ncontent');
-        var l = output.length;
-        var array = new Uint8Array(l);
-        for (var i = 0; i < l; i++) {
-            array[i] = output.charCodeAt(i);
-        }
-
-        pyodide.FS.writeFile(file.name, array);
-        // println('正在处理文件,请稍等...具体进度可以查看F12的控制台(console)')
-        // pyodide.globals.set('progress_display_web', (current,total) => println(`已处理${current}/${total}`))
-        println('正在处理文件,请稍等...')
-        pyodide.globals.set('progress_display_web', (current, total) => postMessage({ f: 'setProgress', args: [current, total] }));
-
-        var state = undefined
-        try {
-            // 这里使用的if_duplex是在pyodide里面set了if_duplex的全局变量
-            await pyodide.runPythonAsync(`
-                        splitPDF('${file.name}',progress_display_web,duplex=if_duplex)
-                        # showAllFiles('/')
-                    `);
-        } catch (e) {
-            state = e.message
-            printError(e.message)
-        }
-
-        // 如果state不为undefined，说明处理失败
-        if (state !== undefined) {
-            println('❌文件处理失败')
-            return;
-        }
-
-        println('✅文件处理完成，正在保存')
-
-        // 去除'.pdf'后缀
-        let filename = file.name.slice(0, -4)
-        await generateLink(`/home/pyodide/${filename}_黑白.pdf`, `${filename}_黑白.pdf`)
-        await generateLink(`/home/pyodide/${filename}_彩色.pdf`, `${filename}_彩色.pdf`)
+async function processFile(file) {
+    if (!file) {
+        return;
     }
+
+    const pyodide = await getPyodide();
+    const fileBuffer = new Uint8Array(await file.arrayBuffer());
+
+    println('正在读取文件');
+    pyodide.FS.writeFile(file.name, fileBuffer);
+
+    println('正在处理文件,请稍等...');
+    pyodide.globals.set('progress_display_web', (current, total, title, pageType) => {
+        postMessage({ f: 'setProgress', args: [current, total, pageType ?? title] });
+    });
+
+    try {
+        await pyodide.runPythonAsync(`
+            splitPDF(${JSON.stringify(file.name)}, progress_display_web, duplex=if_duplex)
+        `);
+    } catch (error) {
+        printError(getErrorMessage(error));
+        println('❌文件处理失败');
+        return;
+    }
+
+    println('✅文件处理完成，正在保存');
+
+    const filename = file.name.replace(/\.pdf$/i, '');
+    await generateLink(`/home/pyodide/${filename}_黑白.pdf`, `${filename}_黑白.pdf`);
+    await generateLink(`/home/pyodide/${filename}_彩色.pdf`, `${filename}_彩色.pdf`);
 }
 
-function setValue(key_value) {
-    // console.log('worker set', key_value[0], 'to', key_value[1], 'value type', typeof(key_value[1]))
-    pyodide.globals.set(key_value[0], key_value[1])
+async function setValue(entry) {
+    if (!Array.isArray(entry) || entry.length !== 2) {
+        throw new Error('setValue 参数不正确');
+    }
+
+    const pyodide = await getPyodide();
+    const [key, value] = entry;
+
+    pyodide.globals.set(key, value);
 }
+
+const messageHandlers = {
+    processFile,
+    setValue
+};
