@@ -11,45 +11,35 @@ function initOutputSwitch() {
     const outputElement = document.getElementById('output');
     const outputTitleElement = document.getElementById('output-title');
     const homeElement = document.getElementById('home');
-    let isOutputOpen = false;
+    const state = window.outputConsoleState ?? { isOpen: true };
     let resizeFrame = 0;
 
-    const updateOutputPosition = () => {
-        const titleHeight = Math.max(outputTitleElement.clientHeight, 36);
-        const outputHeight = Math.max(outputElement.clientHeight, titleHeight);
-        const hiddenHeight = Math.max(outputHeight - titleHeight, 0);
+    window.outputConsoleState = state;
 
-        outputElement.style.bottom = isOutputOpen ? '0' : `-${hiddenHeight}px`;
-        document.documentElement.style.setProperty('--output-height', `${outputHeight}px`);
-        document.documentElement.style.setProperty(
-            '--output-space',
-            `${isOutputOpen ? outputHeight : titleHeight}px`
-        );
+    const renderOutput = () => {
+        const titleHeight = Math.max(outputTitleElement.clientHeight, 36);
+
+        outputElement.style.transform = state.isOpen ? 'translateY(0)' : `translateY(calc(100% - ${titleHeight}px))`;
+
+        homeElement.classList.toggle('dim', state.isOpen && !isMdViewport());
+        switcher.textContent = state.isOpen ? '🔽 收起' : '🔼 展开';
     };
 
     const switchOutput = (nextState) => {
-        isOutputOpen = nextState;
-
-        if (isMdViewport()) {
-            homeElement.classList.remove('dim');
-        } else {
-            homeElement.classList.toggle('dim', isOutputOpen);
-        }
-
-        updateOutputPosition();
-        switcher.textContent = isOutputOpen ? '🔽 收起' : '🔼 展开';
+        state.isOpen = nextState;
+        renderOutput();
     };
 
     window.switchOutput = switchOutput;
 
     switcher.onclick = () => {
-        switchOutput(!isOutputOpen);
+        switchOutput(!state.isOpen);
     };
 
-    switchOutput(isMdViewport());
+    renderOutput();
 
     window.addEventListener('resize', () => {
         cancelAnimationFrame(resizeFrame);
-        resizeFrame = requestAnimationFrame(() => switchOutput(isOutputOpen));
+        resizeFrame = requestAnimationFrame(renderOutput);
     });
 }

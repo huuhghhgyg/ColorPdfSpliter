@@ -26,6 +26,7 @@ const fileState = {
     usingPlaceholderPages: false
 };
 const activePageAnimations = new Set();
+const LOADING_STEPS = ['pyodide', 'packages', 'script'];
 let pageAnimationFrame = 0;
 
 function getElement(id) {
@@ -43,6 +44,7 @@ function printError(errorMessage) {
     const label = document.createElement('span');
     const detail = document.createElement('span');
 
+    hideUploadFileLoading();
     label.textContent = '发生错误';
     detail.style.color = 'grey';
     detail.textContent = errorMessage;
@@ -57,6 +59,8 @@ function printError(errorMessage) {
 }
 
 function setProgress(current, total, pageType) {
+    getElement('source-card').classList.remove('is-reading');
+    hideUploadFileLoading();
     getElement('progress-bar').value = current;
     getElement('progress-bar').max = total;
     getElement('progress-text').textContent = `${current}/${total}`;
@@ -184,6 +188,7 @@ function resetFileStage(file) {
     fileState.usingPlaceholderPages = false;
 
     getElement('file-stage').classList.remove('hidden', 'is-empty');
+    getElement('source-card').classList.remove('is-reading');
     getElement('source-file-name').textContent = file.name;
     getElement('source-file-size').textContent = formatBytes(file.size);
     getElement('source-file-status').textContent = '等待处理';
@@ -195,6 +200,24 @@ function resetFileStage(file) {
 
     resetOutputCard('gray');
     resetOutputCard('color');
+}
+
+function shouldFocusSortStage() {
+    return window.innerWidth < 768;
+}
+
+function focusSortStage() {
+    if (!shouldFocusSortStage()) {
+        return;
+    }
+
+    requestAnimationFrame(() => {
+        getElement('sort-stage').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    });
+}
+
+function afterNextPaint(callback) {
+    window.requestAnimationFrame(() => window.setTimeout(callback, 0));
 }
 
 function sortPages(kind, count) {
@@ -336,20 +359,45 @@ function processPdfFile(file, rgbDiffInput, duplexCheckbox) {
     }
 
     if (!file.name.toLowerCase().endsWith('.pdf')) {
+        hideUploadFileLoading();
         alert('请选择 PDF 文件');
         return;
     }
 
     const rgbDiff = parseRgbDiff(rgbDiffInput);
 
-    resetFileStage(file);
-    pythonWorker.postMessage({ f: 'setValue', args: ['RGBDiff', rgbDiff] });
-    println(`☑RGBDiff 参数设置为 ${rgbDiff}`);
+    showUploadFileLoading();
 
-    pythonWorker.postMessage({ f: 'setValue', args: ['if_duplex', duplexCheckbox.checked] });
-    println(`☑双面打印设置为 ${duplexCheckbox.checked}`);
+    afterNextPaint(() => {
+        resetFileStage(file);
+        getElement('source-card').classList.add('is-reading');
+        getElement('source-file-status').textContent = '正在读取文件';
+        focusSortStage();
 
-    pythonWorker.postMessage({ f: 'processFile', args: file });
+        afterNextPaint(() => {
+            pythonWorker.postMessage({ f: 'setValue', args: ['RGBDiff', rgbDiff] });
+            println(`☑RGBDiff 参数设置为 ${rgbDiff}`);
+
+            pythonWorker.postMessage({ f: 'setValue', args: ['if_duplex', duplexCheckbox.checked] });
+            println(`☑双面打印设置为 ${duplexCheckbox.checked}`);
+
+            pythonWorker.postMessage({ f: 'processFile', args: file });
+        });
+    });
+}
+
+function queuePdfFile(file, rgbDiffInput, duplexCheckbox) {
+    if (!file) {
+        return;
+    }
+
+    getElement('drop-zone').classList.add('is-receiving');
+    showUploadFileLoading('正在接收文件', '文件已选择，正在交给浏览器读取');
+
+    afterNextPaint(() => {
+        getElement('drop-zone').classList.remove('is-receiving', 'is-picking');
+        processPdfFile(file, rgbDiffInput, duplexCheckbox);
+    });
 }
 
 function generateFileLink(filename, blob) {
@@ -384,12 +432,61 @@ function enableComponents() {
     getElement('file-input').disabled = false;
     getElement('drop-zone').classList.remove('is-disabled');
     getElement('upload-hint').textContent = '支持拖拽或点击选择 .pdf';
+    getElement('upload-loading').classList.add('hidden');
 }
 
 function switchConsole(isOpen) {
     if (typeof window.switchOutput === 'function') {
         window.switchOutput(isOpen);
     }
+}
+
+function setLoadingMessage(message) {
+    getElement('loading-title').textContent = message;
+}
+
+function setLoadingError(message) {
+    const loading = getElement('upload-loading');
+
+    loading.classList.add('is-error');
+    getElement('loading-title').textContent = '加载失败';
+    getElement('upload-hint').textContent = message;
+}
+
+function showUploadFileLoading(title = '正在读取文件', hint = '文件已选择，正在准备分类') {
+    const loading = getElement('upload-loading');
+
+    loading.classList.remove('hidden', 'is-error');
+    loading.classList.add('is-file-loading');
+    getElement('loading-title').textContent = title;
+    getElement('upload-hint').textContent = hint;
+}
+
+function hideUploadFileLoading() {
+    const loading = getElement('upload-loading');
+
+    if (!loading || !loading.classList.contains('is-file-loading')) {
+        return;
+    }
+
+    loading.classList.remove('is-file-loading');
+    loading.classList.add('hidden');
+    getElement('upload-hint').textContent = '支持拖拽或点击选择 .pdf';
+}
+
+function setLoadingStep(stepName) {
+    const activeIndex = LOADING_STEPS.indexOf(stepName);
+    const isDone = stepName === 'done';
+
+    LOADING_STEPS.forEach((step, index) => {
+        const element = getElement(`loading-step-${step}`);
+        const icon = element.querySelector('.step-icon');
+        const done = isDone || index < activeIndex;
+
+        element.classList.toggle('is-active', index === activeIndex);
+        element.classList.toggle('is-done', done);
+        icon.textContent = done ? '✓' : '';
+    });
 }
 
 function parseRgbDiff(inputElement) {
@@ -448,11 +545,11 @@ function initComponents() {
             return;
         }
 
-        processPdfFile(event.dataTransfer.files[0], rgbDiffInput, duplexCheckbox);
+        queuePdfFile(event.dataTransfer.files[0], rgbDiffInput, duplexCheckbox);
     });
 
     fileInput.addEventListener('change', () => {
-        processPdfFile(fileInput.files[0], rgbDiffInput, duplexCheckbox);
+        queuePdfFile(fileInput.files[0], rgbDiffInput, duplexCheckbox);
         fileInput.value = '';
     });
 }

@@ -47,11 +47,16 @@
   }
 
   .drop-zone {
-    @apply relative grid grid-cols-4 gap-4 items-center min-h-36 mt-2 p-5 overflow-hidden cursor-pointer text-ink bg-paper-50 border border-dashed border-brass rounded-lg shadow-sm transform transition duration-200;
+    @apply relative grid gap-4 items-center min-h-36 mt-2 p-5 overflow-hidden cursor-pointer text-ink bg-paper-50 border border-dashed border-brass rounded-lg shadow-sm transform transition duration-200;
+    grid-template-columns: auto minmax(0, 1fr);
   }
 
   .drop-zone.is-dragover {
-    @apply -translate-y-0.5 bg-paper-50 border-clay shadow;
+    @apply -translate-y-0.5 bg-paper-100 border-clay shadow;
+  }
+
+  .drop-zone.is-receiving {
+    @apply bg-paper-100 border-clay shadow;
   }
 
   .drop-zone.is-disabled {
@@ -63,7 +68,7 @@
   }
 
   .upload-copy {
-    @apply col-span-3 min-w-0 font-serif;
+    @apply min-w-0 pl-2 font-serif;
   }
 
   .upload-copy strong,
@@ -72,11 +77,78 @@
   }
 
   .upload-copy strong {
-    @apply text-lg text-ink;
+    @apply text-base text-ink;
   }
 
   .upload-copy small {
-    @apply mt-2 text-ink-muted;
+    @apply mt-1 text-xs text-ink-muted;
+  }
+
+  .upload-loading {
+    @apply absolute inset-0 z-20 flex items-center bg-paper-50 px-5 text-left font-serif text-sm text-ink-muted;
+  }
+
+  .upload-loading.hidden {
+    display: none;
+  }
+
+  .upload-loading-card {
+    @apply flex w-full items-start gap-3;
+  }
+
+  .loading-spinner {
+    @apply mt-1 h-4 w-4 flex-none rounded-full border-2 border-gray-300;
+    animation: loading-spin 900ms linear infinite;
+    border-top-color: #917b53;
+  }
+
+  .loading-copy {
+    @apply min-w-0;
+  }
+
+  .loading-copy strong {
+    @apply block text-sm text-ink;
+  }
+
+  .loading-steps {
+    @apply mt-2 grid gap-1;
+  }
+
+  .loading-step {
+    @apply flex items-center gap-2 text-xs text-ink-muted;
+  }
+
+  .step-icon {
+    @apply grid h-4 w-4 flex-none place-items-center rounded-full border border-gray-300 text-xs leading-none;
+  }
+
+  .loading-step.is-active .step-icon {
+    @apply border-brass;
+  }
+
+  .loading-step.is-done {
+    @apply text-ink;
+  }
+
+  .loading-step.is-done .step-icon {
+    @apply border-brass bg-brass text-white;
+  }
+
+  .upload-loading.is-error {
+    @apply text-clay;
+  }
+
+  .upload-loading.is-error .loading-spinner {
+    animation: none;
+    @apply border-clay;
+  }
+
+  .upload-loading.is-error .loading-copy strong {
+    @apply text-clay;
+  }
+
+  .upload-loading.is-file-loading .loading-steps {
+    @apply hidden;
   }
 
   .settings-card {
@@ -84,7 +156,7 @@
   }
 
   .settings-toggle {
-    @apply flex w-full items-center justify-between px-4 py-2 text-left text-sm font-semibold text-ink transition duration-200;
+    @apply flex w-full items-center justify-between px-4 py-2 text-left text-sm font-semibold text-ink transition-colors duration-200;
   }
 
   .settings-toggle:hover {
@@ -96,31 +168,42 @@
   }
 
   .settings-panel {
-    @apply max-h-32 overflow-hidden px-4 pb-4 opacity-100 transition-all duration-200 ease-out;
+    @apply grid max-h-40 origin-top transform scale-y-100 gap-3 overflow-hidden px-4 pb-4 pt-1 opacity-100 duration-300;
+    transition-property: max-height, opacity, transform, padding-top, padding-bottom;
+    transition-timing-function: cubic-bezier(0.2, 0.8, 0.2, 1);
   }
 
   .settings-panel.is-closed {
-    @apply max-h-0 pb-0 opacity-0;
+    @apply max-h-0 scale-y-95 pb-0 pt-0 opacity-0;
   }
 
-  .settings-panel label {
-    @apply block text-sm font-medium text-ink;
+  .settings-field {
+    @apply grid gap-1.5;
+  }
+
+  .settings-field label {
+    @apply text-xs font-semibold text-ink-muted;
   }
 
   .settings-panel input[type="number"] {
-    @apply mt-1 w-full rounded border border-paper-400 bg-white px-3 py-2 text-sm text-ink shadow-sm outline-none;
+    @apply w-full rounded-md border border-paper-400 bg-white px-3 py-2 text-sm text-ink shadow-sm outline-none transition-colors duration-200;
+  }
+
+  .settings-panel input[type="number"]:focus {
+    @apply border-brass;
   }
 
   .duplex-option {
-    @apply mt-4 flex items-center gap-2 text-sm text-ink;
+    @apply flex items-center gap-2 px-0 py-1 text-sm text-ink;
   }
 
   .duplex-option input {
     @apply h-4 w-4 flex-none;
+    accent-color: #917b53;
   }
 
   .duplex-option span {
-    @apply leading-4;
+    @apply leading-none;
   }
 
   .file-stage {
@@ -170,8 +253,19 @@
     @apply relative z-10 mt-1 mb-0 text-center text-xs text-ink-muted;
   }
 
+  .source-file.is-reading .file-status {
+    @apply mx-auto mt-2 inline-flex items-center gap-2 rounded-full bg-paper-50 px-3 py-1 text-brass shadow-sm;
+  }
+
+  .source-file.is-reading .file-status::before {
+    @apply block h-3 w-3 rounded-full border-2 border-paper-400;
+    animation: loading-spin 900ms linear infinite;
+    border-top-color: #917b53;
+    content: "";
+  }
+
   .file-progress {
-    @apply relative z-10 mt-1 flex w-32 items-center text-xs text-gray-500;
+    @apply relative z-10 mt-3 flex w-32 items-center text-xs text-gray-500;
   }
 
   .file-progress progress {
@@ -196,7 +290,8 @@
   }
 
   .download-title {
-    @apply block min-h-6 mt-1 text-center font-serif text-base font-bold text-ink no-underline break-words;
+    @apply mx-auto block min-h-6 mt-1 text-center font-serif text-sm font-bold text-ink no-underline break-words;
+    max-width: 10rem;
     overflow-wrap: anywhere;
   }
 
@@ -258,11 +353,11 @@
   }
 
   .history-panel {
-    @apply mt-5 min-h-0 rounded-lg border border-paper-400 bg-paper-50 p-4 shadow-sm;
+    @apply mt-5 min-h-0 w-full rounded-lg border border-paper-400 bg-paper-50 p-4 shadow-sm;
   }
 
   .history-list {
-    @apply mt-3 grid max-h-56 grid-cols-2 gap-2 overflow-y-auto pr-1;
+    @apply mt-3 grid grid-cols-2 gap-2 pr-1;
   }
 
   .history-card {
@@ -294,38 +389,33 @@
     @apply flex-none whitespace-nowrap;
   }
 
+  #output {
+    will-change: transform;
+  }
+
   .error {
     @apply text-gray-500;
   }
 }
 
 @media (min-width: 768px) {
-  #home {
-    @apply fixed inset-x-0 top-0;
-    bottom: var(--output-space, 14rem);
-    height: auto;
-    min-height: 0;
-    overflow: hidden;
-    transition-property: bottom;
-  }
-
   .app-layout {
-    @apply grid grid-cols-5 gap-8 pb-0;
+    @apply grid grid-cols-8 gap-6 pt-12 pb-24;
     grid-template-rows: minmax(0, 1fr) auto;
-    height: 100%;
+    min-height: 100vh;
   }
 
   .control-panel {
-    @apply col-span-2 justify-center;
+    @apply col-span-3 justify-center pt-6;
   }
 
   .classify-panel {
-    @apply col-span-3 flex min-h-0 flex-col justify-center overflow-y-auto;
+    @apply col-span-5 flex min-h-0 flex-col justify-center overflow-y-auto;
   }
 
   .sort-stage {
     @apply w-full grid items-center;
-    grid-template-columns: minmax(150px, 0.95fr) 64px minmax(220px, 1.2fr);
+    grid-template-columns: minmax(120px, 0.9fr) 48px minmax(180px, 1.2fr);
   }
 
   .sort-arrow {
@@ -363,15 +453,43 @@
   }
 
   .history-panel {
-    @apply col-start-3 col-span-3 row-start-2 mt-0 mb-4 w-full;
+    @apply col-start-1 col-span-8 row-start-2 mt-0 mb-24 w-full;
   }
 
   .history-list {
-    @apply max-h-36 grid-cols-3;
+    @apply grid-cols-3;
   }
 
   #output {
     @apply rounded-none;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1023px) {
+  #title {
+    @apply mt-4;
+  }
+
+  .drop-zone {
+    @apply gap-3 p-4;
+  }
+
+  .upload-mark {
+    @apply w-14 h-20;
+  }
+
+  .upload-copy {
+    @apply pl-1;
+  }
+
+  .upload-copy strong {
+    @apply text-sm;
+  }
+}
+
+@media (min-width: 1024px) {
+  .app-layout {
+    @apply pt-20;
   }
 }
 
@@ -382,6 +500,22 @@
 }
 
 @media (max-width: 767px) {
+  .app-layout {
+    @apply pt-5;
+  }
+
+  #title {
+    @apply mt-3;
+  }
+
+  #title h1 {
+    @apply text-3xl;
+  }
+
+  #title h2 {
+    @apply mt-1 text-lg;
+  }
+
   #output {
     @apply left-3 right-3 w-auto rounded-t-xl shadow-lift;
   }
@@ -395,9 +529,27 @@
   }
 }
 
+@media (max-width: 767px) and (orientation: landscape) {
+  .app-layout {
+    @apply pt-3 gap-3;
+  }
+
+  #title {
+    @apply mt-1;
+  }
+
+  #title h1 {
+    @apply text-2xl;
+  }
+
+  #title h2 {
+    @apply text-base;
+  }
+}
+
 @media (max-width: 520px) {
   .drop-zone {
-    @apply grid-cols-4 min-h-32 p-4;
+    @apply min-h-32 p-4;
   }
 
   .upload-mark {
@@ -425,5 +577,11 @@
 @layer utilities {
   .dim {
     @apply filter brightness-90;
+  }
+}
+
+@keyframes loading-spin {
+  to {
+    transform: rotate(360deg);
   }
 }

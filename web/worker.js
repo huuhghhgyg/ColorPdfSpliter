@@ -4,10 +4,16 @@ const PYMUPDF_WHEEL = 'PyMuPDF-1.24.8-cp311-none-emscripten_3_1_32_wasm32.whl';
 
 const println = (text) => postMessage({ f: 'println', args: text });
 const printError = (text) => postMessage({ f: 'printError', args: text });
+const setLoadingError = (text) => postMessage({ f: 'setLoadingError', args: text });
+const setLoadingMessage = (text) => postMessage({ f: 'setLoadingMessage', args: text });
+const setLoadingStep = (step) => postMessage({ f: 'setLoadingStep', args: step });
 
 let pyodideInstance;
 const pyodideReady = initPyodide().catch((error) => {
-    printError(getErrorMessage(error));
+    const message = getErrorMessage(error);
+
+    setLoadingError(`请检查网络后刷新页面重试：${message}`);
+    printError(message);
     throw error;
 });
 
@@ -88,6 +94,8 @@ function reportPackageProgress(message) {
 }
 
 async function initPyodide() {
+    setLoadingStep('pyodide');
+    setLoadingMessage('正在加载 Pyodide');
     await importPyodide();
     pyodideInstance = await loadPyodide({
         stderr: (text) => {
@@ -95,11 +103,15 @@ async function initPyodide() {
         }
     });
 
+    setLoadingStep('packages');
+    setLoadingMessage('正在加载 PyMuPDF / NumPy');
     await pyodideInstance.loadPackage([PYMUPDF_WHEEL, 'numpy'], {
         messageCallback: reportPackageProgress,
         errorCallback: printError
     });
 
+    setLoadingStep('script');
+    setLoadingMessage('正在加载 PDF 处理逻辑');
     pyodideInstance.runPython(`
         import sys
         print(sys.version)
@@ -109,7 +121,9 @@ async function initPyodide() {
     `);
 
     pyodideInstance.runPython(await (await fetch('./ColorPdfSpliter.py')).text());
-    println('✅脚本加载完成');
+    println('✅PDF 处理逻辑加载完成');
+    setLoadingStep('done');
+    setLoadingMessage('准备完成');
 
     postMessage({ f: 'enableComponents' });
     println('🆗准备就绪');

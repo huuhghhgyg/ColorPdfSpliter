@@ -15,15 +15,15 @@
 <body class="bg-dark">
   <!-- home在md尺寸下，当output打开时有dim -->
   <div id="home" class="bg-paper-500 text-dark flex justify-center min-h-screen overflow-y-auto
-    rounded-none transition-all duration-300 ease-out">
+    rounded-none">
     <!-- Content layout -->
     <div class="app-layout">
       <section class="control-panel">
-        <div id="title" class="mt-8 md:mt-0 md:flex md:items-end lg:flex-col lg:items-start">
+        <div id="title" class="mt-8 md:mt-0 flex flex-col items-start">
           <h1 class="text-4xl lg:text-5xl font-serif hover:underline">
             <a href="https://github.com/huuhghhgyg/ColorPdfSpliter" target="_blank">Color Pdf Spliter</a>
           </h1>
-          <h2 class="text-xl lg:text-2xl font-serif md:ml-2 lg:ml-0 lg:mt-2 text-gray-600">with Pyodide</h2>
+          <h2 class="text-xl lg:text-2xl font-serif mt-2 text-gray-600">with Pyodide</h2>
         </div>
         <p class="font-serif mt-2 lg:mt-4">将PDF的彩色页面与黑白页面分离📄</p>
 
@@ -36,6 +36,28 @@
               <strong>拖入文件，或点击选择</strong>
               <small id="upload-hint">Pyodide 准备完成后即可开始</small>
             </span>
+            <span id="upload-loading" class="upload-loading">
+              <span class="upload-loading-card">
+                <span class="loading-spinner" aria-hidden="true"></span>
+                <span class="loading-copy">
+                  <strong id="loading-title">正在准备运行环境</strong>
+                  <span class="loading-steps">
+                    <span id="loading-step-pyodide" class="loading-step is-active">
+                      <span class="step-icon" aria-hidden="true"></span>
+                      <span>加载 Pyodide</span>
+                    </span>
+                    <span id="loading-step-packages" class="loading-step">
+                      <span class="step-icon" aria-hidden="true"></span>
+                      <span>加载 PyMuPDF / NumPy</span>
+                    </span>
+                    <span id="loading-step-script" class="loading-step">
+                      <span class="step-icon" aria-hidden="true"></span>
+                      <span>加载 PDF 处理逻辑</span>
+                    </span>
+                  </span>
+                </span>
+              </span>
+            </span>
           </label>
         </div>
 
@@ -46,8 +68,10 @@
             <span id="settingsState" class="settings-state" aria-hidden="true">🔼 展开</span>
           </button>
           <div id="settings-panel" class="settings-panel is-closed">
-            <label for="rgb-diff">RGBDiff</label>
-            <input type="number" id="rgb-diff" required placeholder="30">
+            <div class="settings-field">
+              <label for="rgb-diff">RGBDiff</label>
+              <input type="number" id="rgb-diff" required placeholder="30">
+            </div>
             <label class="duplex-option" for="duplex-checkbox">
               <input type="checkbox" id="duplex-checkbox">
               <span>双面打印</span>
@@ -111,8 +135,8 @@
   </div>
 
   <!-- 输出 -->
-  <div id="output" class="fixed z-50 h-4/5 w-full left-0 -bottom-full transition-[bottom] duration-300 ease-out rounded-t-md
-    md:bottom-0 md:h-56 md:w-full md:left-0 md:max-w-none
+  <div id="output" class="fixed z-50 h-4/5 w-full left-0 bottom-0 transition-transform duration-300 ease-out rounded-t-md
+    md:h-56 md:w-full md:left-0 md:max-w-none
     flex flex-col flex-auto overflow-hidden">
     <div id="output-title" class="flex p-4 text-sm font-semibold md:py-2 bg-gray-900 text-gray-200 rounded-t-xl md:rounded-t-md">
       <span class="flex-1">📋 输出
